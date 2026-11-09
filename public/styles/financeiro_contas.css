@@ -1,0 +1,39 @@
+/* public/styles/financeiro_contas.css */
+.table-wrapper {
+    max-height: 65vh;
+    overflow-y: auto;
+    border-radius: 8px;
+    box-shadow: var(--sombra);
+    background: var(--branco);
+    padding: 10px;
+}
+
+#tabelaContas .btn-icon {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    margin-left: 4px;
+}
+
+#tabelaContas .btn-icon i { font-size: 1rem; color: var(--cinza-escuro); }
+
+.modal-form .form-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.modal-form .form-group {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+}
+
+.badge { padding: 4px 8px; border-radius: 8px; font-size: 0.85rem; }
+.badge-success { background: #2ecc71; color: #fff; }
+.badge-muted { background: #dcdcdc; color: #333; }
+
+/* toast */
+.toast { color:#fff; font-weight:600; padding:10px 14px; border-radius:8px; }

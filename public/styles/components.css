@@ -1,0 +1,690 @@
+/* public/styles/components.css - Componentes reutilizáveis */
+/* Cards */
+.card {
+    background-color: var(--branco);
+    border-radius: var(--borda-radius-lg);
+    padding: var(--espaco-lg);
+    margin-bottom: var(--espaco-lg);
+    box-shadow: var(--sombra);
+    border-left: 4px solid var(--verde-escuro);
+    transition: var(--transicao-normal);
+}
+
+.card:hover {
+    box-shadow: var(--sombra-forte);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--espaco-md);
+    padding-bottom: var(--espaco-sm);
+    border-bottom: var(--borda);
+}
+
+.card-title {
+    color: var(--verde-escuro);
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--espaco-sm);
+}
+
+/* Botões */
+.btn {
+    padding: var(--espaco-sm) var(--espaco-md);
+    border: none;
+    border-radius: var(--borda-radius-sm);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espaco-sm);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transicao-normal);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-sm {
+    padding: var(--espaco-xs) var(--espaco-sm);
+    font-size: 0.8rem;
+}
+
+.btn-lg {
+    padding: var(--espaco-md) var(--espaco-lg);
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background-color: var(--verde-escuro);
+    color: var(--branco);
+    border: 1px solid var(--verde-escuro);
+}
+
+.btn-primary:hover {
+    background-color: var(--verde-medio);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(16, 92, 71, 0.3);
+}
+
+.btn-outline-primary {
+    background-color: transparent;
+    color: var(--verde-escuro);
+    border: 1px solid var(--verde-escuro);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--verde-escuro);
+    color: var(--branco);
+}
+
+.btn-danger {
+    background-color: var(--erro);
+    color: var(--branco);
+    border: 1px solid var(--erro);
+}
+
+.btn-danger:hover {
+    background-color: var(--erro);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(231, 120, 131);
+}
+
+/*Btn das tabelas*/
+.btn-editar, .btn-desativar, .btn-excluir {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+
+.btn-editar {
+    color: var(--verde-escuro);
+    background-color: rgba(16, 92, 71, 0.1);
+}
+
+.btn-desativar {
+    color: #ffc107;
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.btn-excluir {
+    color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.btn-editar:hover {
+    background-color: rgba(16, 92, 71, 0.2);
+    transform: scale(1.1);
+}
+
+.btn-desativar:hover {
+    background-color: rgba(255, 193, 7, 0.2);
+    transform: scale(1.1);
+}
+
+.btn-excluir:hover {
+    background-color: rgba(220, 53, 69, 0.2);
+    transform: scale(1.1);
+}
+
+/* Ajustes para os botões de exportação */
+.dt-buttons {
+    margin-bottom: 15px;
+}
+
+.dt-buttons .btn {
+    margin-right: 10px;
+}
+
+
+/* Ícones */
+.icon {
+    font-size: 1.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Tabelas */
+.table-responsive {
+    overflow-x: auto;
+    margin-bottom: var(--espaco-lg);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--espaco-md);
+}
+
+.table th {
+    background-color: var(--verde-escuro);
+    color: var(--branco);
+    padding: var(--espaco-sm) var(--espaco-md);
+    text-align: left;
+}
+
+.table td {
+    padding: var(--espaco-sm) var(--espaco-md);
+    border-bottom: var(--borda);
+}
+
+.table tr:hover {
+    background-color: rgba(16, 92, 71, 0.05);
+}
+
+/* Formulários */
+.form-group {
+    margin-bottom: var(--espaco-md);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--espaco-xs);
+    font-weight: 600;
+    color: var(--verde-escuro);
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--espaco-sm) var(--espaco-md);
+    border: var(--borda);
+    border-radius: var(--borda-radius-sm);
+    font-size: 0.9rem;
+    transition: var(--transicao-normal);
+}
+
+.form-control:focus {
+    border-color: var(--verde-escuro);
+    box-shadow: 0 0 0 3px rgba(16, 92, 71, 0.1);
+    outline: none;
+}
+
+.form-row {
+    display: flex;
+    gap: var(--espaco-md);
+    margin-bottom: var(--espaco-md);
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: var(--espaco-xs) var(--espaco-sm);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.badge-primary {
+    background-color: var(--verde-escuro);
+    color: var(--branco);
+}
+
+.badge-success {
+    background-color: var(--sucesso);
+    color: var(--branco);
+}
+
+.badge-danger {
+    background-color: var(--erro);
+    color: var(--branco);
+}
+
+/* Alertas */
+.alert {
+    padding: var(--espaco-sm) var(--espaco-md);
+    border-radius: var(--borda-radius-sm);
+    margin-bottom: var(--espaco-md);
+    display: flex;
+    align-items: center;
+    gap: var(--espaco-sm);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid var(--sucesso);
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid var(--erro);
+}
+
+#alert-container {
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 10px auto;
+    max-width: 800px;
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* Container fixo logo abaixo do header */
+.alert-stack {
+    display: none; 
+    position: relative;
+    padding: var(--espaco-md);
+}
+
+/* Empilha alertas no canto superior direito do conteúdo */
+.alert-stack .alert {
+    position: relative;
+    animation: slideDown 0.4s ease, fadeIn 0.4s ease;
+}
+
+
+/* Itens de menu */
+.menu-item {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.menu-item>.menu-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+body.menu-expanded .menu-text {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+body.menu-expanded .menu-item>.menu-link {
+    padding: 12px 20px;
+}
+
+.menu-item:not(.has-submenu)>.menu-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.menu-item.active>.menu-link {
+    background-color: transparent;
+    /* Remove o fundo do item ativo */
+    border-left-color: var(--madeira-claro);
+    /* Mantém apenas a borda esquerda */
+    color: white;
+}
+
+body.menu-expanded .menu-item {
+    padding: 12px 20px;
+}
+
+body:not(.menu-expanded) .tooltip {
+    display: block;
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--verde-escuro);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    margin-left: 15px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+    z-index: 100;
+    pointer-events: none;
+}
+
+body:not(.menu-expanded) .menu-link:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+body:not(.menu-expanded) .menu-item:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.menu-item:hover:not(.has-submenu) {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.menu-item.active {
+    background-color: rgba(107, 142, 35, 0.6);
+    border-left-color: var(--madeira-claro);
+    color: white;
+}
+
+.menu-item i {
+    font-size: 18px;
+    min-width: 24px;
+    text-align: center;
+}
+
+.menu-link i {
+    font-size: 18px;
+    min-width: 24px;
+    text-align: center;
+}
+
+.menu-item span {
+    opacity: 0;
+    transform: translateX(-20px);
+    position: absolute;
+    left: 60px;
+    transition: var(--transicao-normal);
+}
+
+body.menu-expanded .menu-item span {
+    opacity: 1;
+    transform: translateX(0);
+    position: static;
+    margin-left: var(--espaco-sm);
+}
+
+/* Submenu */
+.submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background-color: transparent;
+}
+
+/* Ajuste para submenu ativo */
+.has-submenu.active {
+    background-color: transparent; /* Remove o fundo do menu pai */
+}
+
+.has-submenu.active > .menu-link {
+    background-color: transparent; /* Remove o fundo do link pai */
+    border-left-color: transparent; /* Remove a borda do link pai */
+}
+
+body.menu-expanded .has-submenu:hover .submenu,
+body.menu-expanded .has-submenu.active .submenu {
+    max-height: 500px;
+}
+
+body.menu-expanded .has-submenu.active .submenu,
+body.menu-expanded .has-submenu:hover .submenu {
+    max-height: 500px;
+}
+
+body.menu-expanded .menu-text-container {
+    padding: 12px 20px;
+}
+
+.submenu-item {
+    display: block;
+    padding: 10px 15px 10px 50px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    background-color: transparent;
+}
+
+.submenu-item.active {
+    background-color: rgba(16, 92, 71, 0.6);
+    border-left: 3px solid var(--madeira-claro);
+    color: white;
+    font-weight: 500;
+}
+
+/* Container para texto e ícone */
+.menu-text-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 12px 15px;
+}
+
+/* Remoção do ícone de expansão */
+.has-submenu>.menu-link::after {
+    display: none;
+    /* Remove a seta do dropdown */
+}
+
+body.menu-expanded .has-submenu:hover>.menu-link::after {
+    transform: rotate(180deg);
+}
+
+/* Seta indicadora para itens com submenu */
+.has-submenu>.menu-text-container::after {
+    content: "";
+    margin-left: auto;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 5px 5px 0 5px;
+    border-color: rgba(255, 255, 255, 0.7) transparent transparent transparent;
+    transition: transform 0.3s ease;
+}
+
+body.menu-expanded .has-submenu:hover>.menu-text-container::after {
+    transform: rotate(180deg);
+}
+
+/* Submenu - Versão Corrigida */
+.has-submenu {
+    flex-direction: column;
+    padding: 0;
+}
+
+.has-submenu>.submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    width: 100%;
+}
+
+/* Seta indicadora para itens com submenu */
+.has-submenu::after {
+    display: none;
+    /* Remove a seta do dropdown */
+}
+
+body.menu-expanded .has-submenu:hover>.submenu,
+body.menu-expanded .has-submenu.active>.submenu {
+    max-height: 500px;
+}
+
+body.menu-expanded .has-submenu:hover::after {
+    transform: rotate(180deg);
+}
+
+.submenu-item:hover,
+.submenu-item.active {
+    background-color: rgba(16, 92, 71, 0.6);
+    color: white;
+}
+
+.menu-text {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.submenu-item .menu-text {
+    position: static;
+    opacity: 1;
+    transform: none;
+    margin-left: 10px;
+}
+
+.submenu-item .tooltip {
+    display: none;
+    /* Não mostra tooltip para itens de submenu */
+}
+
+.submenu-item:hover {
+    background-color: rgba(16, 92, 71, 0.4);
+    color: white;
+}
+
+/* Tooltip para menu recolhido */
+.tooltip {
+    display: none;
+}
+
+/* Elementos amadeirados */
+.wooden-bg {
+    background-color: var(--madeira-bg);
+    border: 1px solid var(--madeira-claro);
+}
+
+.wooden-panel {
+    background-color: var(--madeira-claro);
+    color: var(--verde-escuro-2);
+    border-radius: var(--borda-radius-md);
+    padding: var(--espaco-md);
+    box-shadow: var(--sombra);
+}
+
+/* Menu lateral esquerdo - Sidebar */
+
+.sidebar {
+    background-color: rgba(16, 92, 71, 0.95);
+    color: white;
+    transition: width 0.3s ease;
+}
+
+/* Expansão automática ao clicar em "Compras" com menu recolhido */
+.sidebar:not(.menu-expanded) .has-submenu>.menu-link {
+    pointer-events: auto;
+    /* Permite clique mesmo com menu recolhido */
+}
+
+.menu-items {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+}
+
+/* Estilos para itens válidos/inválidos */
+.item-valido {
+    border-left: 3px solid #28a745;
+    background-color: rgba(40, 167, 69, 0.05);
+}
+
+.item-invalido {
+    border-left: 3px solid #dc3545;
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+.border-left-danger {
+    border-left: 3px solid #dc3545 !important;
+}
+
+/* Adicione ao seu arquivo CSS */
+#btnExportar {
+    transition: all 0.3s ease;
+    margin-left: 10px;
+}
+
+#btnExportar:hover {
+    background-color: #28a745 !important;
+    transform: translateY(-2px);
+}
+
+#btnExportar:active {
+    transform: translateY(0);
+}
+
+/* Estilos para página de erro */
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 70vh;
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 5rem;
+    color: var(--vermelho);
+    margin-bottom: 2rem;
+}
+
+.error-message {
+    max-width: 600px;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.btn-voltar {
+    margin-top: 1.5rem;
+}
+
+.table-pagination-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding: 6px 4px;
+    gap: 12px;
+}
+
+.pagination-info {
+    font-size: 14px;
+    color: #666;
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 6px;
+}
+
+.page-btn {
+    background: transparent;
+    color: var(--verde-escuro, #1e7e34); /* use a var do seu tema se existir */
+    border: 1px solid var(--verde-escuro, #1e7e34);
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background .12s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: rgba(30, 126, 52, 0.08);
+}
+
+.page-btn:hover {
+    background: rgba(0, 128, 0, 0.1); /* leve fundo verde translúcido */
+}
+
+.page-btn.active {
+    background: var(--green);
+    border-color: var(--green);
+}
+
+.page-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}

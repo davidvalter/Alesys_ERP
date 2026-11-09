@@ -1,0 +1,39 @@
+.crud-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.table td, .table th {
+    text-align: left;
+}
+
+.table td:last-child {
+    display: flex;
+    gap: 6px;
+    flex-wrap: nowrap;
+}
+
+.modal-form {
+    max-width: 500px;
+}
+
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.toast {
+    background: #333;
+    color: #fff;
+    padding: 10px 16px;
+    margin-top: 8px;
+    border-radius: 6px;
+    opacity: 0.95;
+    transition: all 0.3s ease;
+}
+.toast.success { background: #28a745; }
+.toast.error { background: #dc3545; }

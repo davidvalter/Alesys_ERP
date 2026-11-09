@@ -1,0 +1,123 @@
+<?php
+// public/api/get_registro_maquininhas_matriz.php
+
+require_once __DIR__ . '/../../configs/database.php';
+
+header('Content-Type: application/json');
+
+try {
+
+    $db = getDB();
+
+    $dataInicial = $_GET['dataInicial'] ?? null;
+    $dataFinal   = $_GET['dataFinal']   ?? null;
+
+    if (!$dataInicial || !$dataFinal) {
+        throw new Exception('Datas inválidas');
+    }
+
+    // =============================
+    // Busca dados base
+    // =============================
+    $stmt = $db->prepare("
+        SELECT 
+            f.Data,
+            i.Operadora,
+            i.MeioPagamento,
+            SUM(i.Valor) AS Total
+        FROM FechamentosCaixaItens i
+        JOIN FechamentosCaixa f ON f.Id = i.FechamentoId
+        WHERE f.Data BETWEEN ? AND ?
+        GROUP BY f.Data, i.Operadora, i.MeioPagamento
+        ORDER BY f.Data ASC
+    ");
+    $stmt->execute([$dataInicial, $dataFinal]);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!$rows) {
+        echo json_encode([
+            'success' => true,
+            'datas' => [],
+            'linhas' => [],
+            'totais_operadora' => [],
+            'total_geral' => []
+        ]);
+        exit;
+    }
+
+    // =============================
+    // Montagem das datas
+    // =============================
+    $datas = [];
+    foreach ($rows as $r) {
+        if (!in_array($r['Data'], $datas)) {
+            $datas[] = $r['Data'];
+        }
+    }
+
+    // =============================
+    // Estrutura base
+    // =============================
+    $estrutura = [];
+    $totaisOperadora = [];
+    $totalGeral = array_fill(0, count($datas), 0);
+
+    // =============================
+    // Monta matriz
+    // =============================
+    foreach ($rows as $r) {
+
+        $op   = $r['Operadora'];
+        $meio = ucfirst($r['MeioPagamento']);
+        $data = $r['Data'];
+        $valor = floatval($r['Total']);
+
+        if (!isset($estrutura[$op][$meio])) {
+            $estrutura[$op][$meio] = array_fill(0, count($datas), 0);
+        }
+
+        $idx = array_search($data, $datas);
+
+        $estrutura[$op][$meio][$idx] += $valor;
+
+        // Total por operadora
+        if (!isset($totaisOperadora[$op])) {
+            $totaisOperadora[$op] = array_fill(0, count($datas), 0);
+        }
+
+        $totaisOperadora[$op][$idx] += $valor;
+
+        // Total geral
+        $totalGeral[$idx] += $valor;
+    }
+
+    // =============================
+    // Normaliza linhas
+    // =============================
+    $linhas = [];
+
+    foreach ($estrutura as $op => $meios) {
+        foreach ($meios as $meio => $valores) {
+            $linhas[] = [
+                'operadora' => $op,
+                'meio' => $meio,
+                'valores' => $valores
+            ];
+        }
+    }
+
+    echo json_encode([
+        'success' => true,
+        'datas' => $datas,
+        'linhas' => $linhas,
+        'totais_operadora' => $totaisOperadora,
+        'total_geral' => $totalGeral
+    ]);
+
+} catch (Exception $e) {
+
+    echo json_encode([
+        'success' => false,
+        'error' => $e->getMessage()
+    ]);
+}

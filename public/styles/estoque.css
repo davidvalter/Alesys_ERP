@@ -1,0 +1,129 @@
+/* =========================================
+   ESTOQUE - PADRÃO SAAS ALESYS
+   /public/style/estoque.css
+========================================= */
+
+.estoque-page {
+    padding-top: 8px;
+}
+
+/* HEADER */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-title {
+    font-weight: 600;
+    letter-spacing: .3px;
+}
+
+/* TABELA PADRÃO (usa card-default do app.css) */
+
+.table-modern {
+    font-size: .88rem;
+}
+
+.table-modern thead th {
+    background: #f5f7fa;
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    font-weight: 600;
+    padding: 12px 14px;
+}
+
+.table-modern td {
+    padding: 12px 14px;
+}
+
+.table-modern tbody tr:hover {
+    background: #f8fafc;
+}
+
+/* Alinhamento numérico */
+.table-modern td.text-end {
+    font-weight: 500;
+}
+
+/* SEARCH */
+.search-wrapper {
+    width: 240px;
+}
+
+/* MODAL PADRÃO */
+.modal-modern {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 18px 40px rgba(0,0,0,.12);
+}
+
+.modal-modern .modal-header {
+    border-bottom: 1px solid #eef1f4;
+}
+
+.modal-modern .modal-footer {
+    border-top: 1px solid #eef1f4;
+}
+
+/* =============================
+   MODAL CUSTOM
+============================= */
+
+.modal-custom {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    backdrop-filter: blur(3px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-custom-dialog {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+}
+
+.modal-custom-content {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px rgba(0,0,0,.18);
+    overflow: hidden;
+    animation: modalFade .2s ease;
+}
+
+@keyframes modalFade {
+    from { transform: translateY(-10px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+
+.modal-custom-header,
+.modal-custom-footer {
+    padding: 16px 20px;
+    border-bottom: 1px solid #eef1f4;
+}
+
+.modal-custom-footer {
+    border-top: 1px solid #eef1f4;
+    border-bottom: none;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-custom-body {
+    padding: 20px;
+}
+
+.modal-custom-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #eef1f4;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

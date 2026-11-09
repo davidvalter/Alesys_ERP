@@ -1,0 +1,225 @@
+# =====================================================================
+# Alesys — .gitignore
+# Dependências, caches, logs, builds, temporários, variáveis de
+# ambiente e artefatos gerados automaticamente
+# =====================================================================
+
+# ---------- Sistema operacional ----------
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.stackdump
+
+# ---------- IDEs e editores ----------
+.idea/
+*.iml
+*.ipr
+*.iws
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.classpath
+.project
+.settings/
+.history/
+*.sublime-project
+*.sublime-workspace
+# VS Code: ignora o resto, mas mantém configurações compartilhadas do time
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# ---------- Variáveis de ambiente e segredos ----------
+.env
+.env.*
+!.env.example
+!.env.template
+secrets.json
+credentials.json
+service-account*.json
+appsettings.Development.json
+appsettings.Local.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+# Se o .npmrc contiver token de registry (_authToken), descomente:
+# .npmrc
+
+# ---------- Node.js / JavaScript / TypeScript ----------
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/cache/
+.yarn/install-state.gz
+.pnp.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+# Builds de bundlers e frameworks
+.next/
+.nuxt/
+.svelte-kit/
+.output/
+.astro/
+.angular/
+.parcel-cache/
+.turbo/
+.expo/
+.expo-shared/
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+develop-eggs/
+eggs/
+.eggs/
+parts/
+sdist/
+wheels/
+*.egg-info/
+*.egg
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.hypothesis/
+.tox/
+.nox/
+.mypy_cache/
+.dmypy.json
+.pyre/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# ---------- Java / Kotlin / JVM ----------
+*.class
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+.gradle/
+# O Gradle wrapper (gradlew, gradlew.bat, gradle-wrapper.jar) DEVE ser versionado
+
+# ---------- .NET / Visual Studio ----------
+bin/
+obj/
+*.binlog
+TestResults/
+
+# ---------- PHP / Composer ----------
+# vendor/ também cobre vendor de Ruby e Go
+vendor/
+composer.phar
+.phpunit.result.cache
+.phpunit.cache/
+
+# ---------- Ruby ----------
+.bundle/
+*.gem
+
+# ---------- Go ----------
+*.test
+
+# ---------- Rust ----------
+# target/ já coberto em "Builds genéricos" abaixo
+
+# ---------- C / C++ ----------
+*.o
+*.a
+*.lib
+*.pdb
+*.exe
+*.out
+*.so
+*.dylib
+
+# ---------- Mobile (Android / iOS / Flutter) ----------
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ipa
+*.hmap
+xcuserdata/
+DerivedData/
+Pods/
+.packages
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# ---------- Builds genéricos ----------
+dist/
+build/
+out/
+target/
+
+# ---------- Logs ----------
+logs/
+*.log
+
+# ---------- Testes e cobertura ----------
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+cypress/screenshots/
+cypress/videos/
+
+# ---------- Banco de dados ----------
+*.db
+*.sqlite
+*.sqlite3
+*.sqlitedb
+
+# ---------- Temporários e backups ----------
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*~
+.cache/
+
+# ---------- Específicos do Alesys ----------
+# Configs com credenciais (nunca versionar; manter um *.example no repo)
+configs/alenfe.php
+configs/database.php
+configs/segredos.php
+
+# Conteúdo gerado em runtime (o !.gitkeep mantém a pasta no clone)
+public/uploads/*
+!public/uploads/.gitkeep
+public/logs/*
+!public/logs/.gitkeep
+
+# Gerenciado pelo servidor (ACME, validações de domínio)
+public/.well-known/*
+
+# Descomente se o projeto tiver essas pastas:
+# storage/
+# backups/

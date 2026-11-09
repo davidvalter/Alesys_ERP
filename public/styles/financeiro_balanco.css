@@ -1,0 +1,28 @@
+/* public/styles/financeiro_balanco.css */
+
+/* ===== BALANÇO ===== */
+
+/* valores positivos/negativos */
+td.positivo {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+td.negativo {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* primeira coluna fixa */
+.sticky-col {
+    position: sticky;
+    left: 0;
+    background: #fff;
+    z-index: 2;
+}
+
+/* linha destaque (totais) */
+tr.linha-total {
+    font-weight: 600;
+    background: #f8fafc;
+}

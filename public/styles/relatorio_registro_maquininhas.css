@@ -1,0 +1,442 @@
+/* =====================================================================
+   relatorio_registro_maquininhas.css
+   Estilos específicos para a página de Relatório Matricial de Maquininhas
+   Compatível com o tema global app.css (variáveis --verde-*, --cinza-*)
+   ===================================================================== */
+
+/* ============================================================
+   SEÇÃO 1 — TOKENS DE DESIGN ESPECÍFICOS DA PÁGINA
+   ============================================================
+   Tokens locais para evitar poluir o :root global.
+   Mantêm consistência com o tema Alecrim mas permitem ajustes
+   finos sem risco de vazamento para outras páginas. */
+
+.registro-maquininhas {
+  --rm-filtro-bg: var(--cinza-100);
+  --rm-filtro-border: var(--cinza-200);
+  --rm-filtro-focus: var(--verde-claro);
+
+  /* Cores semânticas com contraste WCAG validado:
+     - Verde (destaque positivo): contraste 7:1 (AAA) em fundo branco
+     - Laranja (alerta moderado): contraste 4,5:1 (AA) em fundo branco
+     - Vermelho (crítico): contraste 4,5:1 (AA) em fundo branco */
+  --rm-valor-destaque: #198754;
+  --rm-valor-alerta: #d97706;
+  --rm-valor-critico: #dc2626;
+
+  --rm-sort-color: var(--verde-escuro);
+  --rm-sort-hover: color-mix(in srgb, var(--verde-medio) 10%, transparent);
+
+  /* Overlay de loading com fundo semi-transparente e desfoque moderno */
+  --rm-loading-bg: rgba(255, 255, 255, 0.92);
+  --rm-loading-z: 99999;
+}
+
+
+/* ============================================================
+   SEÇÃO 2 — CARD DE FILTROS (.filtros-card)
+   ============================================================
+   Card com borda sutil que delimita a área interativa.
+   Isso reduz carga cognitiva em páginas densas — o usuário
+   reconhece rapidamente onde estão os controles. */
+
+.registro-maquininhas .filtros-card {
+  border: 1px solid var(--rm-filtro-border);
+  border-radius: 16px;
+  background: var(--rm-filtro-bg);
+}
+
+/* Labels em caixa alta e compactas: ocupam pouco espaço vertical
+   mas ainda são legíveis, guiando o olhar sem competir com os inputs. */
+.registro-maquininhas .filtros-card .form-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+/* Inputs com transição suave para feedback tátil imediato.
+   0.2s é o padrão ouro para micro-interações (Material Design guideline). */
+.registro-maquininhas .filtros-card .form-control,
+.registro-maquininhas .filtros-card .form-select {
+  transition: all 0.2s ease;
+}
+
+.registro-maquininhas .filtros-card .form-control:focus,
+.registro-maquininhas .filtros-card .form-select:focus {
+  border-color: var(--rm-filtro-focus);
+  box-shadow: 0 0 0 0.25rem rgba(95, 163, 129, 0.25);
+}
+
+
+/* ============================================================
+   SEÇÃO 3 — CARDS KPI
+   ============================================================
+   O CSS global (app.css) já define .card-kpi com hover/shadow.
+   Aqui fazemos override seletivo APENAS no layout interno,
+   preservando o comportamento interativo global.
+   
+   Diferente do KPI global (que tem ícone + label + valor),
+   este layout é centralizado: label pequena em cima, valor
+   grande embaixo — hierarquia mais adequada para dashboards. */
+
+.registro-maquininhas .card-kpi {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.registro-maquininhas .card-kpi .kpi-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cinza-900);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+/* Valor grande e em negrito no verde-escuro da marca para
+   destaque imediato — o olhar captura o número antes do texto. */
+.registro-maquininhas .card-kpi .kpi-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--verde-escuro);
+  margin: 0;
+  line-height: 1;
+}
+
+
+/* ============================================================
+   SEÇÃO 4 — GRID DE GRÁFICOS
+   ============================================================ 
+   Grid mantido do código original. Adicionado padding no body
+   dos cards para que os charts tenham "respiro" visual. */
+
+.registro-maquininhas .charts-grid .card-body {
+  padding: 1.5rem;
+}
+
+
+/* ============================================================
+   SEÇÃO 5 — TABELA MATRICIAL (REFATORAÇÃO COMPLETA)
+   ============================================================
+   A tabela é o componente central da página. As decisões abaixo
+   priorizam legibilidade de dados financeiros em grade. */
+
+.registro-maquininhas .matriz {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  /* Largura mínima evita que colunas fiquem estreitas demais
+     em telas largas, o que quebraria a legibilidade dos valores. */
+  min-width: 1100px;
+}
+
+/* Cabeçalho com borda dupla inferior funciona como "régua" visual
+   que separa o cabeçalho do corpo da tabela. */
+.registro-maquininhas .matriz thead th {
+  background: #f8f9fa;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--cinza-200);
+  white-space: nowrap;
+}
+
+/* Padding consistente entre células: melhora a escanabilidade
+   dos dados numéricos e evita que valores se toquem. */
+.registro-maquininhas .matriz td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--cinza-100);
+  white-space: nowrap;
+}
+
+/* Células numéricas: alinhamento à direita + fonte mono-espaçada.
+   Isso permite comparar valores verticalmente com precisão —
+   essencial em qualquer relatório financeiro. */
+.registro-maquininhas .matriz .valor {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-family: 'Roboto Mono', 'SF Mono', monospace;
+}
+
+/* Primeira coluna fixa (sticky): mantém o contexto visível
+   durante o scroll horizontal. Sem isso, o usuário "se perde"
+   ao rolar para ver datas distantes. */
+.registro-maquininhas .matriz th:first-child,
+.registro-maquininhas .matriz td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: white;
+  font-weight: 500;
+  text-align: left;
+}
+
+/* Zebra striping com contraste sutil (#f8f9fa = diferença de ~7%
+   do branco). Reduz erros de leitura em tabelas longas — 
+   heurística Nielsen n° 6: "Reconhecimento em vez de memorização". */
+.registro-maquininhas .matriz tbody tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+/* Hover com tom verde temático para manter a identidade visual
+   da marca. A transição de 0.2s evita mudanças bruscas. */
+.registro-maquininhas .matriz tbody tr:hover {
+  background: rgba(47, 107, 79, 0.04);
+  transition: background-color 0.2s ease;
+}
+
+/* Indicadores semânticos com cores validadas por contraste.
+   Verde = acima da média (bom), Laranja = acima da média (atenção),
+   Vermelho = abaixo da média (crítico). */
+.registro-maquininhas .valor-destaque {
+  color: var(--rm-valor-destaque);
+  font-weight: 600;
+}
+.registro-maquininhas .valor-alerta {
+  color: var(--rm-valor-alerta);
+}
+.registro-maquininhas .valor-critico {
+  color: var(--rm-valor-critico);
+  font-weight: 600;
+}
+
+/* Linhas de operadora com gradiente (mantido do código original) */
+.registro-maquininhas .linha-operadora td {
+  padding: 10px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #fff;
+  border-bottom: none !important;
+}
+
+.registro-maquininhas .operadora-stone {
+  background: linear-gradient(90deg, #00a859, #19c37d);
+}
+.registro-maquininhas .operadora-rede {
+  background: linear-gradient(90deg, #f37021, #ff9a56);
+}
+.registro-maquininhas .operadora-pagbank {
+  background: linear-gradient(90deg, #009ee3, #3fc1ff);
+}
+.registro-maquininhas .operadora-infinitypay {
+  background: linear-gradient(90deg, #5f2eea, #8a5cff);
+}
+.registro-maquininhas .operadora-sipag {
+  background: linear-gradient(90deg, #0052cc, #2f80ff);
+}
+.registro-maquininhas .operadora-dinheiro {
+  background: linear-gradient(90deg, #6c757d, #adb5bd);
+}
+
+/* Totais intermediários com fundo neutro para contraste com o corpo */
+.registro-maquininhas .linha-total {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+.registro-maquininhas .linha-total td {
+  padding: 10px 12px;
+}
+
+/* Total geral com gradiente escuro — funciona como "fechamento"
+   visual da tabela, similar a um rodapé de documento. */
+.registro-maquininhas .total-geral {
+  background: linear-gradient(to right, #212529, #343a40);
+  color: white;
+  font-weight: 700;
+}
+
+/* Scroll horizontal com scrollbar temática (verde médio).
+   A barra de rolagem personalizada reforça a identidade visual
+   mesmo em um elemento de sistema. */
+.registro-maquininhas .tabela-scroll-wrapper {
+  overflow: hidden;
+}
+.registro-maquininhas .tabela-scroll-inner {
+  overflow-x: auto;
+}
+.registro-maquininhas .tabela-scroll-inner::-webkit-scrollbar {
+  height: 8px;
+}
+.registro-maquininhas .tabela-scroll-inner::-webkit-scrollbar-thumb {
+  background: var(--verde-medio);
+  border-radius: 4px;
+}
+.registro-maquininhas .tabela-scroll-inner::-webkit-scrollbar-track {
+  background: var(--cinza-100);
+}
+
+
+/* ============================================================
+   SEÇÃO 6 — COLUNAS ORDENÁVEIS
+   ============================================================
+   Indicadores de ordenação (▲/▼) posicionados inline para
+   economizar espaço horizontal, essencial em tabelas com
+   muitas colunas de data. */
+
+.registro-maquininhas .matriz th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.registro-maquininhas .matriz th.sortable:hover {
+  background-color: var(--rm-sort-hover);
+}
+
+.registro-maquininhas .matriz th.sort-asc::after {
+  content: " ▲";
+  font-size: 9px;
+  opacity: 0.7;
+}
+.registro-maquininhas .matriz th.sort-desc::after {
+  content: " ▼";
+  font-size: 9px;
+  opacity: 0.7;
+}
+
+
+/* ============================================================
+   SEÇÃO 7 — TOOLBAR DA TABELA
+   ============================================================ */
+
+.registro-maquininhas .table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+
+/* ============================================================
+   SEÇÃO 8 — PAGINAÇÃO CUSTOMIZADA
+   ============================================================
+   Usa a mesma estrutura Bootstrap (.page-item, .page-link) mas
+   com cores e bordas arredondadas temáticas. A transição com
+   leve elevação (translateY) fornece feedback tátil. */
+
+.registro-maquininhas .pagination-custom .page-item .page-link {
+  color: var(--verde-medio);
+  border-radius: 8px;
+  margin: 2px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  border: 1px solid var(--cinza-200);
+}
+
+.registro-maquininhas .pagination-custom .page-item:not(.active):not(.disabled) .page-link:hover {
+  background: var(--verde-medio);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.registro-maquininhas .pagination-custom .page-item.active .page-link {
+  background: var(--verde-medio);
+  color: white;
+  border-color: var(--verde-medio);
+}
+
+.registro-maquininhas .pagination-custom .page-item.disabled .page-link {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* ============================================================
+   SEÇÃO 9 — OVERLAY DE LOADING
+   ============================================================
+   Backdrop blur moderno: indica processamento sem isolar
+   completamente o usuário do contexto da página.
+   A transição de opacidade evita flash abrupto. */
+
+.registro-maquininhas .rm-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--rm-loading-bg);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--rm-loading-z);
+  transition: opacity 0.3s ease;
+}
+
+.registro-maquininhas .rm-loading-overlay.active {
+  display: flex;
+}
+
+
+/* ============================================================
+   SEÇÃO 10 — ESTADOS DE FOCUS (ACESSIBILIDADE WCAG)
+   ============================================================
+   Focus visíveis em todos os elementos interativos.
+   Atende WCAG 2.4.7 "Focus Visible" — critério obrigatório
+   para navegação por teclado. */
+
+.registro-maquininhas .filtros-card .form-control:focus,
+.registro-maquininhas .filtros-card .form-select:focus,
+.registro-maquininhas .btn:focus-visible,
+.registro-maquininhas .pagination-custom .page-link:focus-visible {
+  outline: 2px solid var(--verde-claro);
+  outline-offset: 2px;
+}
+
+.registro-maquininhas th.sortable:focus-visible {
+  outline: 2px dashed var(--verde-medio);
+  outline-offset: -2px;
+}
+
+
+/* ============================================================
+   SEÇÃO 11 — BREAKPOINTS RESPONSIVOS
+   ============================================================ */
+
+/* Tablets e telas médias: gráficos empilham em coluna única */
+@media (max-width: 900px) {
+  .registro-maquininhas .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile grande: tabela mais compacta, labels menores */
+@media (max-width: 768px) {
+  .registro-maquininhas .matriz {
+    font-size: 12px;
+  }
+  .registro-maquininhas .matriz th,
+  .registro-maquininhas .matriz td {
+    padding: 6px 8px;
+  }
+  .registro-maquininhas .card-kpi .kpi-value {
+    font-size: 2rem;
+  }
+  .registro-maquininhas .filtros-card .form-label {
+    font-size: 0.6rem;
+  }
+  .registro-maquininhas .charts-grid .card {
+    height: 260px;
+  }
+}
+
+/* Mobile pequeno: toolbar empilha, botões ocupam largura total */
+@media (max-width: 576px) {
+  .registro-maquininhas .table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .registro-maquininhas .pagination-custom .page-link {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+  }
+}

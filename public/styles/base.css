@@ -1,0 +1,113 @@
+/* public/styles/base.css - Estilos globais e variáveis de cores */
+:root {
+    /* Nova paleta de cores baseada nos RGB fornecidos */
+    --verde-escuro: #105c47;       /* RGB: 16, 92, 71 */
+    --verde-escuro-2: #293126;     /* RGB: 41, 49, 38 */
+    --verde-medio: #1a7d5e;
+    --verde-claro: #4c9e85;
+    --verde-musgo: #6b8e23;        /* Verde musgo original mantido */
+    
+    /* Tons amadeirados mantidos */
+    --madeira-claro: #D2B48C;
+    --madeira-medio: #b38b6d;
+    --madeira-escuro: #8b5a2b;
+    --madeira-bg: #FAF8F5;
+    
+    /* Cores neutras */
+    --branco: #FFFFFF;
+    --cinza-claro: #f5f5f5;
+    --cinza-medio: #e0e0e0;
+    --cinza-escuro: #757575;
+    --preto: #212121;
+    
+    /* Cores de feedback */
+    --sucesso: #28a745;
+    --erro: #dc3545;
+    --aviso: #ffc107;
+    --info: #17a2b8;
+    
+    /* Sombras e bordas */
+    --sombra: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --sombra-forte: 0 8px 15px rgba(0, 0, 0, 0.15);
+    --borda: 1px solid rgba(0, 0, 0, 0.1);
+    --borda-verde: 1px solid var(--verde-escuro);
+    
+    /* Espaçamentos */
+    --espaco-xs: 4px;
+    --espaco-sm: 8px;
+    --espaco-md: 16px;
+    --espaco-lg: 24px;
+    --espaco-xl: 32px;
+    
+    /* Bordas arredondadas */
+    --borda-radius-sm: 4px;
+    --borda-radius-md: 8px;
+    --borda-radius-lg: 12px;
+    --borda-radius-xl: 16px;
+    
+    /* Transições */
+    --transicao-rapida: all 0.2s ease;
+    --transicao-normal: all 0.3s ease;
+    --transicao-lenta: all 0.5s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--preto);
+    background-color: var(--madeira-bg);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+    font-family: inherit;
+}
+
+input, select, textarea, button {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+/* Animações */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Classes utilitárias */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+.text-verde { color: var(--verde-escuro); }
+.text-madeira { color: var(--madeira-medio); }
+.text-branco { color: var(--branco); }
+.bg-verde { background-color: var(--verde-escuro); }
+.bg-madeira { background-color: var(--madeira-claro); }
+.hidden { display: none !important; }

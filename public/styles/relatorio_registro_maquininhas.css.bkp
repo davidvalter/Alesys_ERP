@@ -1,0 +1,275 @@
+/* public/styles/relatorio_registro_maquininhas.css */
+
+.registro-maquininhas {
+    max-width: 100%;
+}
+
+/* ================== HEADER ================== */
+
+.page-header h4 {
+    font-weight: 700;
+}
+
+.page-header small {
+    color: #6c757d;
+}
+
+/* ================== KPI ================== */
+
+.dashboard-gerencial {
+    margin-bottom: var(--espaco-lg);
+}
+
+/* ================== CHARTS ================== */
+
+.chart-card {
+    height: 320px;
+    overflow: hidden;
+}
+
+.chart-card .card-header {
+    font-weight: 600;
+    font-size: 0.8rem;
+    background: transparent;
+    border-bottom: 1px solid var(--cinza-200);
+}
+
+.chart-card .card-body {
+    flex: 1;
+    padding: 6px 10px;
+    position: relative;
+}
+
+.chart-card canvas {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* ================== GRID CHARTS ================== */
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+        "fat fat"
+        "op meios";
+    gap: 12px;
+}
+
+.chart-full {
+    grid-area: fat;
+}
+
+.chart-half:nth-child(2) {
+    grid-area: op;
+}
+
+.chart-half:nth-child(3) {
+    grid-area: meios;
+}
+
+/* ================== RESPONSIVO ================== */
+
+@media (max-width: 900px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "fat"
+            "op"
+            "meios";
+    }
+
+    .chart-card {
+        height: 260px;
+    }
+
+    .page-header {
+        text-align: center;
+    }
+}
+
+/* =========================================================
+   TABELA COM SCROLL CONTROLADO (VERSÃO CORRETA E LIMPA)
+   ========================================================= */
+
+/* Wrapper externo bloqueia expansão do layout */
+.tabela-scroll-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Scroll horizontal acontece somente aqui */
+.tabela-scroll-inner {
+    position: relative; /* MUITO IMPORTANTE */
+    overflow-x: scroll;
+    overflow-y: hidden;
+}
+
+.sticky-col {
+    position: sticky;
+    left: 0;
+    background: #fff;
+    z-index: 6;
+}
+
+/* =====================================================
+   TABELA MATRIZ - VISUAL MODERNO
+   ===================================================== */
+
+.matriz-wrapper {
+    overflow-x: scroll; /* scroll sempre visível */
+    overflow-y: hidden;
+    border-radius: 12px;
+    position: relative;
+}
+
+/* Barra de rolagem estilizada */
+.matriz-wrapper::-webkit-scrollbar {
+    height: 10px;
+}
+
+.matriz-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.25);
+    border-radius: 6px;
+}
+
+/* Estrutura base */
+.matriz {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px; /* menor para dar respiro */
+    min-width: 1100px;
+}
+
+/* Cabeçalho */
+.matriz thead th {
+    background: #f8f9fa;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    padding: 10px 12px;
+    border-bottom: 2px solid #e9ecef;
+    white-space: nowrap;
+}
+
+/* Células */
+.matriz td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f1f3f5;
+    white-space: nowrap;
+}
+
+/* Valores alinhados à direita */
+.matriz td:not(:first-child),
+.matriz th:not(:first-child) {
+    text-align: right;
+}
+
+/* Primeira coluna (descrição) */
+.matriz td:first-child,
+.matriz th:first-child {
+    text-align: left;
+    font-weight: 500;
+}
+
+/* Zebra leve */
+.matriz tbody tr:nth-child(even) {
+    background: #fcfcfc;
+}
+
+/* Hover sutil */
+.matriz tbody tr:hover {
+    background: #f1f3f5;
+}
+
+/* =========================
+   LINHA DE OPERADORA
+   ========================= */
+
+.linha-operadora td {
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #fff;
+    border-bottom: none !important;
+}
+
+/* Stone */
+.operadora-stone {
+    background: linear-gradient(90deg, #00a859, #19c37d);
+}
+
+/* Rede */
+.operadora-rede {
+    background: linear-gradient(90deg, #f37021, #ff9a56);
+}
+
+/* PagBank */
+.operadora-pagbank {
+    background: linear-gradient(90deg, #009ee3, #3fc1ff);
+}
+
+/* InfinityPay */
+.operadora-infinitypay {
+    background: linear-gradient(90deg, #5f2eea, #8a5cff);
+}
+
+/* Sipag */
+.operadora-sipag {
+    background: linear-gradient(90deg, #0052cc, #2f80ff);
+}
+
+/* Dinheiro */
+.operadora-dinheiro {
+    background: linear-gradient(90deg, #6c757d, #adb5bd);
+}
+
+/* =========================
+   BLOCO DE TOTAIS
+   ========================= */
+
+/* Espaço antes dos totais */
+.linha-total:first-of-type td {
+    border-top: 4px solid #dee2e6;
+}
+
+/* Totais intermediários */
+.linha-total {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.linha-total td {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+/* Total geral */
+.total-geral {
+    background: linear-gradient(90deg, #212529, #343a40);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13.5px;
+}
+
+/* =========================
+   PRIMEIRA COLUNA FIXA
+   ========================= */
+
+.matriz td:first-child,
+.matriz th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #ffffff;
+}
+
+/* Quando for operadora, manter a cor */
+.operadora-cell {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+}

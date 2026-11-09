@@ -1,0 +1,121 @@
+.container {
+    padding: 20px;
+}
+
+.page-title {
+    margin-bottom: 20px;
+}
+
+.filtros {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.tabela-dados {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabela-dados th, .tabela-dados td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.tabela-dados th {
+    background-color: #f2f2f2;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    color: #fff;
+}
+
+.badge-success { background-color: #28a745; }
+.badge-danger { background-color: #dc3545; }
+.badge-green { background-color: #2ecc71; }
+.badge-red { background-color: #e74c3c; }
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.btn:hover {
+    opacity: 0.85;
+}
+
+.btn-edit, .btn-toggle {
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px 8px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.btn-edit:hover {
+    background-color: #d4edda;
+}
+
+.btn-toggle:hover {
+    background-color: #f8d7da;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    width: 400px;
+    max-width: 90%;
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group input,
+.form-group select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}

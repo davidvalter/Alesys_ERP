@@ -1,0 +1,76 @@
+/* ============ Cupom / Nota Fiscal ============ */
+.cupom {
+    width: 80mm;
+    max-width: 100%;
+    margin: 0 auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    line-height: 1.35;
+    color: #000;
+    background: #fff;
+    padding: 4px 6px;
+}
+.cupom hr {
+    border-top: 1px dashed #000;
+    opacity: 1;
+    margin: 4px 0;
+}
+.cupom-linha { margin-bottom: 4px; }
+.cupom-valores { font-size: 10px; }
+
+/* ============ Impressão térmica 80mm (Epson / Elgin) ============ */
+@media print {
+    body * { visibility: hidden !important; }
+    .cupom, .cupom * { visibility: visible !important; }
+    .cupom {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 80mm;
+        padding: 0;
+        font-size: 11px;
+    }
+    .nao-imprimir { display: none !important; }
+    @page { margin: 0; size: 80mm auto; }
+}
+
+/* ============ Tabela de itens (modelo: ITEM | CÓD. | DESC. | VALOR) ============ */
+.cupom-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+}
+.cupom-tabela th {
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 1px dashed #000;
+    padding: 2px 0;
+}
+.cupom-tabela td {
+    vertical-align: top;
+    padding: 2px 0;
+}
+.cupom-tabela .col-item { width: 8%; }
+.cupom-tabela .col-cod  { width: 14%; }
+.cupom-tabela .col-desc { width: 53%; }
+.cupom-tabela .col-valor { width: 25%; text-align: right; white-space: nowrap; }
+.cupom-tabela .cupom-valores { font-size: 9px; }
+
+/* ============ Total em destaque ============ */
+.cupom-total {
+    font-size: 13px;
+    padding-top: 4px;
+    border-top: 1px dashed #000;
+}
+
+/* ============ QR Code menor ============ */
+#qrNota img {
+    width: 70px !important;
+    height: 70px !important;
+}
+
+/* ============ Espaço reservado para a senha do cliente ============ */
+.senha-cliente {
+    font-size: 10px;
+    margin: 4px 0;
+}

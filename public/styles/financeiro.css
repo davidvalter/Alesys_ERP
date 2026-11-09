@@ -1,0 +1,126 @@
+.financeiro-filtros {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.financeiro-filtros select,
+.financeiro-filtros input {
+    height: 38px;
+}
+
+.financeiro-filtros button {
+    height: 38px;
+    padding: 0 20px;
+    white-space: nowrap;
+}
+
+.financeiro-filtros .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Evita quebra de linha do botão quando couber na mesma */
+@media (min-width: 768px) {
+  .financeiro-filtros {
+    flex-wrap: nowrap;
+  }
+}
+
+.financeiro-filtros > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filtro-acao {
+    display: flex;
+    align-items: flex-end;
+}
+
+.financeiro-filtros .filtro-acao {
+    align-items: flex-end;
+    justify-content: flex-start;
+    display: flex;
+}
+
+.financeiro-filtros .filtro-acao button {
+    height: 38px;
+    white-space: nowrap;
+}
+
+.resumo-financeiro {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+
+.resumo-card {
+    background: var(--branco);
+    border-radius: var(--borda-radius-md);
+    box-shadow: var(--sombra);
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.resumo-card h3 {
+    font-size: 1rem;
+    color: var(--verde-escuro);
+    margin-bottom: 5px;
+}
+
+.resumo-card.entrada p { color: var(--verde-escuro); }
+.resumo-card.saida p { color: #e74c3c; }
+.resumo-card.taxas p { color: #f39c12; }
+.resumo-card.liquido p { color: var(--azul-escuro); }
+
+.table-wrapper {
+    max-height: 65vh;
+    overflow-y: auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* Toasts */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 500;
+  min-width: 240px;
+  animation: fadeInOut 4s forwards;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.toast.success { background: #2ecc71; }
+.toast.error { background: #e74c3c; }
+.toast.info { background: #3498db; }
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10%, 90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+.actions-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+  margin-top: 25px;
+}
+

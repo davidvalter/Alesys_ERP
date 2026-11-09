@@ -1,0 +1,196 @@
+/* Estilos específicos para a pagina public/vendas/index.php */
+.produtos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.produto-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--branco);
+    border-radius: var(--borda-radius-md);
+    box-shadow: var(--sombra);
+    overflow: hidden;
+    transition: var(--transicao-normal);
+}
+
+.produto-card:hover {
+    transform: scale(1.05);
+    box-shadow: var(--sombra-forte);
+}
+
+.produto-card-body {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    cursor: pointer;
+}
+
+.produto-card-body img {
+    width: 100%;
+    height: 140px; /* aumentei um pouco */
+    object-fit: contain; /* mostra o prato inteiro sem cortar */
+    background: #fafafa; /* fundo leve para pratos transparentes */
+    border-radius: var(--borda-radius-sm);
+}
+
+.produto-card-body h4 {
+    font-size: 0.95rem;
+    margin: 10px 0 5px;
+    color: var(--verde-escuro);
+}
+
+
+.produto-card-body p {
+    font-size: 0.85rem;
+    color: var(--cinza-escuro);
+}
+
+.produto-card-footer {
+    display: flex;
+    flex-direction: row;
+    border-top: 1px solid var(--cinza-claro);
+}
+
+.btn-action {
+    flex: 1;
+    border: none;              /* remove borda */
+    border-radius: 0;          /* remove radius */
+    padding: 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: background 0.2s ease;
+}
+
+/* arredonda só cantos do card */
+.produto-card-footer button:first-child {
+    border-bottom-left-radius: var(--borda-radius-md);
+}
+
+.produto-card-footer button:last-child {
+    border-bottom-right-radius: var(--borda-radius-md);
+}
+
+.btn-inativar {
+    background: #ffc107;
+    color: #333;
+}
+
+.btn-inativar:hover {
+    background: #e0a800;
+}
+
+.btn-ativar {
+    background: #28a745;
+    color: #fff;
+}
+
+.btn-ativar:hover {
+    background: #218838;
+}
+
+.btn-excluir {
+    background: #dc3545;
+    color: #fff;
+}
+
+.btn-excluir:hover {
+    background: #c82333;
+}
+
+.card-novo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: var(--cinza-claro);
+    border: 2px dashed var(--verde-claro);
+    color: var(--verde-escuro);
+}
+
+.card-novo:hover {
+    background: #e8f5f1;
+}
+
+/* Container dos toasts */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Toast padrão */
+.toast {
+    min-width: 250px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    color: #fff;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeIn 0.4s ease, fadeOut 0.4s ease 3.6s forwards;
+}
+
+/* Variantes */
+.toast-success { background: #28a745; }
+.toast-error   { background: #dc3545; }
+.toast-warning { background: #ffc107; color: #333; }
+.toast-info    { background: #17a2b8; }
+
+/* Botão de fechar */
+.toast button {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateY(-20px); }
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--cinza-claro);
+  margin-bottom: 10px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  cursor: pointer;
+  background: #f8f9fa;
+  border: none;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.tab-btn.active {
+  background: var(--branco);
+  border-bottom: 2px solid var(--verde-escuro);
+}
+
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+}

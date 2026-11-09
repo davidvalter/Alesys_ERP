@@ -1,0 +1,33 @@
+/* ===== UPLOAD OFX ===== */
+
+.ofx-upload-box {
+    border: 2px dashed #d1d5db;
+    border-radius: 14px;
+    padding: 40px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fafafa;
+}
+
+.ofx-upload-box:hover {
+    border-color: var(--verde-claro);
+    background: #f0fdf4;
+}
+
+/* quando tiver arquivo */
+.ofx-upload-box.active {
+    border-color: #16a34a;
+    background: #ecfdf5;
+}
+
+/* nome do arquivo */
+#nomeArquivo {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.85rem;
+}
+
+.ofx-upload-box {
+    max-width: 420px;
+    width: 100%;
+}

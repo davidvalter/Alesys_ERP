@@ -1,0 +1,73 @@
+/* =========================================
+   RELATÓRIO POR CATEGORIA - VISUAL MODERNO
+========================================= */
+
+.relatorio-categoria {
+    padding-top: 10px;
+}
+
+/* HEADER */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-title {
+    font-weight: 600;
+    letter-spacing: 0.4px;
+}
+
+/* CARD MODERNO */
+.card-modern {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+}
+
+.card-modern .card-header {
+    background: linear-gradient(90deg, #f8f9fa, #ffffff);
+    font-weight: 600;
+    border-bottom: 1px solid #edf1f4;
+}
+
+/* TABELA */
+.table-modern {
+    font-size: 0.88rem;
+}
+
+.table-modern thead th {
+    background: #f5f7fa;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: .5px;
+}
+
+.table-modern tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.table-modern td {
+    padding: 8px 10px;
+}
+
+/* BOTÕES */
+.btn-primary {
+    background: linear-gradient(90deg, #0d6efd, #3d8bfd);
+    border: none;
+}
+
+.btn-primary:hover {
+    opacity: .9;
+}
+
+/* SELECT MULTIPLO */
+select[multiple] {
+    height: 140px;
+}
+
+/* GRÁFICO */
+canvas {
+    margin-top: 10px;
+}

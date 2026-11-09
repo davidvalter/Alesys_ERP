@@ -1,0 +1,50 @@
+/* public/styles/admin.css */
+.admin-content {
+    margin-left: 250px;
+    padding: 20px;
+}
+
+.admin-header {
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Estilos para as tabelas administrativas */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th, .admin-table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+}
+
+.admin-table th {
+    background-color: #f8f9fa;
+    text-align: left;
+}
+
+/* Estilos para os cards administrativos */
+.admin-card {
+    margin-bottom: 20px;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .25rem;
+}
+
+.admin-card .card-header {
+    padding: .75rem 1.25rem;
+    background-color: rgba(0,0,0,.03);
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+.admin-card .card-body {
+    padding: 1.25rem;
+}
+
+.admin-card .card-footer {
+    padding: .75rem 1.25rem;
+    background-color: rgba(0,0,0,.03);
+    border-top: 1px solid rgba(0,0,0,.125);
+}

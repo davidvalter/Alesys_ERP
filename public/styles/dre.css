@@ -1,0 +1,183 @@
+.dre-tabela td,
+.dre-tabela th {
+    vertical-align: middle;
+}
+
+.dre-tabela tbody td {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Linhas de detalhe levemente recuadas */
+.dre-tabela .dre-linha {
+    padding-left: 2rem !important;
+}
+
+/* Subtotais (=) */
+.dre-tabela .dre-subtotal td {
+    font-weight: 600;
+    background-color: #f8f9fa;
+    border-top: 2px solid #dee2e6;
+}
+
+/* Totais finais */
+.dre-tabela .dre-total td {
+    font-weight: 700;
+    background-color: #eef2ff;
+    border-top: 2px solid #adb5bd;
+}
+
+/* Resultado Líquido do Exercício */
+.dre-tabela .dre-res-liquido td {
+    background-color: #d1e7dd;
+}
+
+.dre-valor-neg {
+    color: #dc3545;
+}
+
+/* KPIs: valores negativos em vermelho */
+#dre-kpis .widget-card h4.dre-valor-neg {
+    color: #dc3545;
+}
+
+/* ===================== IMPRESSÃO / PDF ===================== */
+@page {
+    size: A4 portrait;
+    margin: 1.5cm 1.2cm;
+}
+
+@media print {
+
+    /* Isola a área da DRE: esconde todo o resto (sidebar, topbar, chrome do app) */
+    body * {
+        visibility: hidden;
+    }
+
+    #dre-print-area,
+    #dre-print-area * {
+        visibility: visible;
+    }
+
+    #dre-print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    /* Filtros, KPIs, botões e alerta JAMAIS vão para o papel */
+    .d-print-none,
+    #dre-alerta-sem-classe,
+    #dre-loading {
+        display: none !important;
+    }
+
+    body {
+        font-size: 10.5pt;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    /* ---------- Cabeçalho executivo ---------- */
+    .dre-print-header {
+        margin-bottom: 1rem;
+    }
+
+    .dre-print-cabecalho-linha {
+        border-bottom: 3px solid #212529;
+        padding-bottom: .35rem;
+        margin-bottom: .4rem;
+    }
+
+    .dre-print-header h2 {
+        font-size: 15pt;
+        font-weight: 700;
+        letter-spacing: .3px;
+        margin: 0;
+    }
+
+    .dre-print-subtitulo {
+        font-size: 8.5pt;
+        color: #495057;
+    }
+
+    .dre-print-periodo {
+        font-size: 11pt;
+        font-weight: 700;
+    }
+
+    .dre-print-filtros {
+        font-size: 8pt;
+        color: #495057;
+        margin-bottom: .8rem;
+    }
+
+    /* ---------- Tabela: formato de relatório ---------- */
+    .dre-tabela {
+        font-size: 9.5pt;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .dre-tabela th,
+    .dre-tabela td {
+        padding: 2.2px 6px;
+        border-bottom: none !important;
+        background-color: transparent !important;
+        /* elimina zebra/heranças */
+    }
+
+    .dre-tabela thead th {
+        border-bottom: 1.5px solid #212529 !important;
+        font-weight: 700;
+    }
+
+    .dre-tabela .dre-linha {
+        padding-left: 1.8rem !important;
+    }
+
+    /* Subtotais: risca fina + fundo cinza claro */
+    .dre-tabela .dre-subtotal td {
+        border-top: 1px solid #6c757d !important;
+        font-weight: 600;
+        background-color: #f1f3f5 !important;
+    }
+
+    /* Totais: risca alta + fundo cinza médio */
+    .dre-tabela .dre-total td {
+        border-top: 2px solid #212529 !important;
+        font-weight: 700;
+        background-color: #e9ecef !important;
+    }
+
+    .dre-tabela .dre-res-liquido td {
+        background-color: #d1e7dd !important;
+    }
+
+    .dre-tabela td.text-muted {
+        color: #495057 !important;
+    }
+
+    .dre-tabela tr {
+        page-break-inside: avoid;
+    }
+
+    /* ---------- Rodapé executivo ---------- */
+    .dre-print-footer {
+        margin-top: 1.2rem;
+        padding-top: .4rem;
+        border-top: 1px solid #adb5bd;
+        font-size: 8.5pt;
+        color: #495057;
+        page-break-inside: avoid;
+    }
+
+    /* Cores mantidas no papel */
+    .dre-tabela .dre-subtotal td,
+    .dre-tabela .dre-total td,
+    .dre-tabela .dre-res-liquido td,
+    .dre-print-cabecalho-linha,
+    .dre-tabela thead th {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
