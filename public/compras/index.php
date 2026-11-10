@@ -47,6 +47,11 @@ require_once __DIR__ . '/../templates/base_protected_v2.php';
                     Notas Fiscais
                 </a>
 
+                <a href="importar_alenfe.php" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-cloud-arrow-down me-1"></i>
+                    Importar notas do AleNFE
+                </a>
+
                 <a href="comparacao_precos.php" class="btn btn-outline-success btn-sm">
                     <i class="fas fa-shop me-1"></i>
                     Comparar Preços
