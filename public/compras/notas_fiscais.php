@@ -180,10 +180,12 @@ try {
 
                             <div class="col-md-2">
                                 <label>Tipo (XML do fornecedor)</label>
-                                <select id="tipo" class="form-control input-nota">\n                                    <option value="">Selecione</option>
-                                    <option value="0">Entrada</option>
-                                    <option value="1">Saída</option>
+                                <select id="tipo" class="form-control input-nota">
+                                    <option value="">Selecione</option>
+                                    <option value="0">0 · tpNF</option>
+                                    <option value="1">1 · tpNF</option>
                                 </select>
+                                <small class="text-muted">Campo fiscal da nota do fornecedor; não define compra ou venda no Alesys.</small>
                             </div>
 
                             <div class="col-md-3">
