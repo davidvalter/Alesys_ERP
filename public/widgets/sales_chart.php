@@ -2,7 +2,7 @@
     <div class="dashboard-panel-heading">
         <div>
             <span class="dashboard-eyebrow">Desempenho</span>
-            <h2 id="dashboard-chart-title">Vendas realizadas</h2>
+            <h2 id="dashboard-chart-title">Vendas de pedidos fechados</h2>
         </div>
         <span class="dashboard-period-caption" id="dashboard-period-caption">Últimos 7 dias</span>
     </div>
