@@ -944,7 +944,8 @@ CREATE TABLE `VendasNFCE` (
 -- Executar uma única vez no banco alesys antes de habilitar a tela.
 -- Esta migração não grava movimentações de estoque.
 
-CREATE TABLE IF NOT EXISTS `AleNFEComprasImportacao` (
+DROP TABLE IF EXISTS `AleNFEComprasImportacao`;
+CREATE TABLE `AleNFEComprasImportacao` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `AleNFEId` varchar(100) NOT NULL,
   `ChaveAcesso` varchar(44) NOT NULL,
@@ -974,7 +975,8 @@ CREATE TABLE IF NOT EXISTS `AleNFEComprasImportacao` (
   CONSTRAINT `FK_AleNFECompras_NFe` FOREIGN KEY (`NFeId`) REFERENCES `NFe` (`Id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE IF NOT EXISTS `AleNFEComprasImportacaoItens` (
+DROP TABLE IF EXISTS `AleNFEComprasImportacaoItens`;
+CREATE TABLE `AleNFEComprasImportacaoItens` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `ImportacaoId` int(11) NOT NULL,
   `NumeroItem` int(11) NOT NULL,
@@ -994,7 +996,8 @@ CREATE TABLE IF NOT EXISTS `AleNFEComprasImportacaoItens` (
   CONSTRAINT `FK_AleNFEComprasItem_Produto` FOREIGN KEY (`ProdutoCodigo`) REFERENCES `Produtos` (`Codigo`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE IF NOT EXISTS `AleNFEComprasProdutoMapeamento` (
+DROP TABLE IF EXISTS `AleNFEComprasProdutoMapeamento`;
+CREATE TABLE `AleNFEComprasProdutoMapeamento` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `FornecedorCNPJ` varchar(18) NOT NULL,
   `CodigoFornecedor` varchar(100) NOT NULL,
