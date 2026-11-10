@@ -22,7 +22,7 @@ require __DIR__ . '/templates/base_protected_v2.php';
                 <option value="mes">Este mês</option>
             </select>
             <button type="button" class="dashboard-refresh" id="dashboard-refresh" aria-label="Atualizar dados" title="Atualizar dados">
-                <i class="fas fa-rotate" aria-hidden="true"></i>
+                <i class="fas fa-sync-alt" aria-hidden="true"></i>
             </button>
             <span class="dashboard-updated" id="dashboard-updated" aria-live="polite"></span>
         </div>
