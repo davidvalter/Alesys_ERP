@@ -1,43 +1,37 @@
-<div class="row g-3 dashboard-status">
-
-    <div class="col-6 col-md-3">
-        <div class="card status-card">
-            <i class="fas fa-receipt text-primary"></i>
-            <div>
-                <strong>Pedidos hoje</strong>
-                <span>48</span>
-            </div>
+<section class="dashboard-metrics" aria-label="Indicadores do período">
+    <article class="dashboard-metric">
+        <div class="dashboard-metric-icon is-green"><i class="fas fa-sack-dollar" aria-hidden="true"></i></div>
+        <div class="dashboard-metric-copy">
+            <span class="dashboard-metric-label">Vendas realizadas</span>
+            <strong class="dashboard-metric-value" id="metric-sales" aria-live="polite">—</strong>
+            <span class="dashboard-metric-comparison" id="metric-sales-change">Carregando dados</span>
         </div>
-    </div>
+    </article>
 
-    <div class="col-6 col-md-3">
-        <div class="card status-card">
-            <i class="fas fa-fire text-warning"></i>
-            <div>
-                <strong>Em preparo</strong>
-                <span>6</span>
-            </div>
+    <article class="dashboard-metric">
+        <div class="dashboard-metric-icon is-blue"><i class="fas fa-receipt" aria-hidden="true"></i></div>
+        <div class="dashboard-metric-copy">
+            <span class="dashboard-metric-label">Pedidos fechados</span>
+            <strong class="dashboard-metric-value" id="metric-orders" aria-live="polite">—</strong>
+            <span class="dashboard-metric-comparison" id="metric-orders-change">No período selecionado</span>
         </div>
-    </div>
+    </article>
 
-    <div class="col-6 col-md-3">
-        <div class="card status-card">
-            <i class="fas fa-check text-success"></i>
-            <div>
-                <strong>Finalizados</strong>
-                <span>32</span>
-            </div>
+    <article class="dashboard-metric">
+        <div class="dashboard-metric-icon is-purple"><i class="fas fa-chart-simple" aria-hidden="true"></i></div>
+        <div class="dashboard-metric-copy">
+            <span class="dashboard-metric-label">Ticket médio</span>
+            <strong class="dashboard-metric-value" id="metric-ticket" aria-live="polite">—</strong>
+            <span class="dashboard-metric-comparison" id="metric-ticket-change">Vendas ÷ pedidos fechados</span>
         </div>
-    </div>
+    </article>
 
-    <div class="col-6 col-md-3">
-        <div class="card status-card">
-            <i class="fas fa-box text-danger"></i>
-            <div>
-                <strong>Estoque crítico</strong>
-                <span>5</span>
-            </div>
+    <article class="dashboard-metric">
+        <div class="dashboard-metric-icon is-amber"><i class="fas fa-hourglass-half" aria-hidden="true"></i></div>
+        <div class="dashboard-metric-copy">
+            <span class="dashboard-metric-label">Pedidos em aberto</span>
+            <strong class="dashboard-metric-value" id="metric-open-orders" aria-live="polite">—</strong>
+            <span class="dashboard-metric-comparison">Aguardando conclusão no PDV</span>
         </div>
-    </div>
-
-</div>
+    </article>
+</section>
