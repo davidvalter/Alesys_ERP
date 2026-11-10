@@ -55,6 +55,14 @@ foreach ($items as &$item) {
     $ncm = (string)($item['NCM'] ?? '');
     $prodStmt->execute([$search, $ncm, $ncm, $ncm, $ncm]);
     $item['sugestoes'] = $prodStmt->fetchAll(PDO::FETCH_ASSOC);
+    if ($mapped) {
+        $mappedStmt = $pdo->prepare('SELECT Codigo, Nome, UnidadeMedida, NCM FROM Produtos WHERE Codigo=? AND Ativo=1');
+        $mappedStmt->execute([(int)$mapped]);
+        $mappedProduct = $mappedStmt->fetch(PDO::FETCH_ASSOC);
+        if ($mappedProduct && !in_array((int)$mappedProduct['Codigo'], array_map('intval', array_column($item['sugestoes'], 'Codigo')), true)) {
+            array_unshift($item['sugestoes'], $mappedProduct);
+        }
+    }
 }
 unset($item);
 
