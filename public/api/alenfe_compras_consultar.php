@@ -2,6 +2,10 @@
 require_once __DIR__ . '/alenfe_compras_helpers.php';
 
 $pdo = alenfeComprasAccess();
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    alenfeComprasJson(['success' => false, 'message' => 'Método não permitido.'], 405);
+}
+alenfeComprasVerifyCsrf();
 $response = alenfeHttp($pdo, 'GET', alenfeComprasListPath($pdo));
 if ((int)$response['status'] < 200 || (int)$response['status'] >= 300) {
     alenfeComprasJson(['success' => false, 'message' => alenfeComprasApiError($response, 'Não foi possível consultar as notas de compra.')], 502);
