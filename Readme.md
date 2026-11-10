@@ -31,7 +31,7 @@ Não há manifesto Composer ou npm no repositório. As bibliotecas de interface 
 
 ## Banco de dados
 
-O arquivo [`database/Alesys_Schema.sql`](database/Alesys_Schema.sql) contém o dump do schema do Alesys, com 43 tabelas e relacionamentos por chaves estrangeiras. Ele descreve estruturas para:
+O arquivo [`database/Alesys_Schema.sql`](database/Alesys_Schema.sql) contém o dump do schema do Alesys, com 40 tabelas e relacionamentos por chaves estrangeiras. Ele descreve estruturas para:
 
 - usuários, perfis, módulos, permissões, empresas e configurações;
 - produtos, mercados/fornecedores, notas fiscais e classificações NCM/CEST;
