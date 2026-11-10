@@ -1,7 +1,12 @@
 <?php
 // Helpers da importação manual de notas de compra do AleNFE.
 require_once __DIR__ . '/../../configs/database.php';
-require_once __DIR__ . '/../../configs/alenfe-example.php';
+$alenfePrivateConfig = __DIR__ . '/../../configs/alenfe.php';
+if (is_file($alenfePrivateConfig)) {
+    require_once $alenfePrivateConfig;
+} else {
+    require_once __DIR__ . '/../../configs/alenfe-example.php';
+}
 require_once __DIR__ . '/nfce_helpers.php';
 require_once __DIR__ . '/../conf/autenticacao.php';
 
