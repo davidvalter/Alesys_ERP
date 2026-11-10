@@ -203,7 +203,36 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
                 }
                 select.addEventListener('change', updateConfirmState);
             });
-            supplier.addEventListener('change', updateConfirmState);
+            supplier.onchange = updateConfirmState;
+            document.querySelectorAll('.produtoBusca').forEach(input => {
+                let timer;
+                input.addEventListener('input', () => {
+                    clearTimeout(timer);
+                    const item = activeItems.find(x => String(x.Id) === input.dataset.item);
+                    const select = document.querySelector('.produtoMap[data-item="'+input.dataset.item+'"]');
+                    const query = input.value.trim();
+                    if (query.length < 2) {
+                        const suggestions = item?.sugestoes || [];
+                        select.innerHTML = '<option value="">Selecione produto…</option>' + suggestions.map(p => '<option value="'+esc(p.Codigo)+'">'+esc(p.Nome)+' · '+esc(p.UnidadeMedida || 'UN')+(p.NCM ? ' · NCM '+esc(p.NCM) : '')+'</option>').join('');
+                        if (item?.ProdutoCodigo) select.value = String(item.ProdutoCodigo);
+                        updateConfirmState();
+                        return;
+                    }
+                    timer = setTimeout(async () => {
+                        try {
+                            const response = await fetch('/api/alenfe_compras_produtos.php?q=' + encodeURIComponent(query), {credentials:'same-origin'});
+                            const data = await response.json();
+                            if (!response.ok || !data.success) throw new Error(data.message || 'Falha ao buscar produtos.');
+                            const previous = select.value;
+                            select.innerHTML = '<option value="">Selecione produto…</option>' + data.produtos.map(p => '<option value="'+esc(p.Codigo)+'">'+esc(p.Nome)+' · '+esc(p.UnidadeMedida || 'UN')+(p.NCM ? ' · NCM '+esc(p.NCM) : '')+'</option>').join('');
+                            if ([...select.options].some(o => o.value === previous)) select.value = previous;
+                            updateConfirmState();
+                        } catch (error) {
+                            showMessage(error.message, 'danger');
+                        }
+                    }, 250);
+                });
+            });
             document.getElementById('revisaoConteudo').classList.remove('d-none');
             if (activeNote.ImportadaNFeId) {
                 throw new Error('Esta chave de acesso já existe no Alesys como nota #' + activeNote.ImportadaNFeId + '.');
