@@ -1,6 +1,6 @@
 <section class="dashboard-metrics" aria-label="Indicadores do período">
     <article class="dashboard-metric">
-        <div class="dashboard-metric-icon is-green"><i class="fas fa-sack-dollar" aria-hidden="true"></i></div>
+        <div class="dashboard-metric-icon is-green"><i class="fas fa-coins" aria-hidden="true"></i></div>
         <div class="dashboard-metric-copy">
             <span class="dashboard-metric-label">Vendas realizadas</span>
             <strong class="dashboard-metric-value" id="metric-sales" aria-live="polite">—</strong>
@@ -18,7 +18,7 @@
     </article>
 
     <article class="dashboard-metric">
-        <div class="dashboard-metric-icon is-purple"><i class="fas fa-chart-simple" aria-hidden="true"></i></div>
+        <div class="dashboard-metric-icon is-purple"><i class="fas fa-chart-line" aria-hidden="true"></i></div>
         <div class="dashboard-metric-copy">
             <span class="dashboard-metric-label">Ticket médio</span>
             <strong class="dashboard-metric-value" id="metric-ticket" aria-live="polite">—</strong>
@@ -27,7 +27,7 @@
     </article>
 
     <article class="dashboard-metric">
-        <div class="dashboard-metric-icon is-amber"><i class="fas fa-hourglass-half" aria-hidden="true"></i></div>
+        <div class="dashboard-metric-icon is-amber"><i class="fas fa-clock" aria-hidden="true"></i></div>
         <div class="dashboard-metric-copy">
             <span class="dashboard-metric-label">Pedidos em aberto</span>
             <strong class="dashboard-metric-value" id="metric-open-orders" aria-live="polite">—</strong>
