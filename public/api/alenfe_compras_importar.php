@@ -4,6 +4,7 @@ $pdo = alenfeComprasAccess();
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     alenfeComprasJson(['success' => false, 'message' => 'Método não permitido.'], 405);
 }
+alenfeComprasVerifyCsrf();
 $input = json_decode(file_get_contents('php://input'), true);
 if (!is_array($input)) alenfeComprasJson(['success' => false, 'message' => 'Corpo JSON inválido.'], 400);
 $importId = filter_var($input['importacaoId'] ?? null, FILTER_VALIDATE_INT);
