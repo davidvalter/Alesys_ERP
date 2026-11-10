@@ -29,6 +29,15 @@ function alenfeComprasAccess(): PDO
     return getDB();
 }
 
+function alenfeComprasVerifyCsrf(): void
+{
+    $token = (string)($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
+    $expected = (string)($_SESSION['alenfe_compras_csrf'] ?? '');
+    if ($expected === '' || $token === '' || !hash_equals($expected, $token)) {
+        alenfeComprasJson(['success' => false, 'message' => 'Sessão de segurança inválida. Atualize a página e tente novamente.'], 403);
+    }
+}
+
 function alenfeComprasConfig(PDO $pdo, string $key, string $fallback = ''): string
 {
     $stmt = $pdo->prepare('SELECT Valor FROM Configuracoes WHERE Chave = ? LIMIT 1');
