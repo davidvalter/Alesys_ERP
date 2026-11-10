@@ -41,10 +41,7 @@ try {
             n.Id,
             n.Numero,
             n.Serie,
-            CASE 
-                WHEN n.Tipo = 0 THEN 'Entrada'
-                ELSE 'Saída'
-            END AS Tipo,
+            n.Tipo AS Tipo,
             DATE_FORMAT(n.DataEmissao, '%d/%m/%Y %H:%i') AS DataEmissao,
             DATE_FORMAT(n.DataRecebimento, '%d/%m/%Y %H:%i') AS DataRecebimento,
             m.Nome AS MercadoNome,
