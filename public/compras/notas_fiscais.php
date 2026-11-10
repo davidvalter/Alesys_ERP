@@ -37,6 +37,8 @@ try {
                 Voltar
             </a>
 
+            <a href="importar_alenfe.php" class="btn btn-outline-primary btn-sm"><i class="fas fa-cloud-arrow-down me-1"></i> Importar do AleNFE</a>
+
             <button id="btnNovaNota" class="btn btn-success btn-sm">
                 <i class="fas fa-plus me-1"></i> Nova Nota
             </button>
@@ -62,7 +64,7 @@ try {
                         <tr>
                             <th>Número</th>
                             <th>Série</th>
-                            <th>Tipo</th>
+                            <th>Tipo (XML)</th>
                             <th>Emissão</th>
                             <th>Mercado</th>
                             <th class="text-end">Valor</th>
@@ -177,8 +179,8 @@ try {
                             </div>
 
                             <div class="col-md-2">
-                                <label>Tipo</label>
-                                <select id="tipo" class="form-control input-nota">
+                                <label>Tipo (XML do fornecedor)</label>
+                                <select id="tipo" class="form-control input-nota">\n                                    <option value="">Selecione</option>
                                     <option value="0">Entrada</option>
                                     <option value="1">Saída</option>
                                 </select>
