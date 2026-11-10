@@ -31,7 +31,7 @@ Não há manifesto Composer ou npm no repositório. As bibliotecas de interface 
 
 ## Banco de dados
 
-O arquivo [`database/Alesys_Schema.sql`](database/Alesys_Schema.sql) contém o dump do schema do Alesys, com 40 tabelas e relacionamentos por chaves estrangeiras. Ele descreve estruturas para:
+O arquivo [`database/Alesys_Schema.sql`](database/Alesys_Schema.sql) contém o dump do schema do Alesys, com 43 tabelas e relacionamentos por chaves estrangeiras. Ele descreve estruturas para:
 
 - usuários, perfis, módulos, permissões, empresas e configurações;
 - produtos, mercados/fornecedores, notas fiscais e classificações NCM/CEST;
@@ -59,6 +59,23 @@ Quando uma mudança no sistema exigir alteração do banco:
 3. Documente em texto claro no README o objetivo da alteração, a ordem em que aplicar o script e eventuais passos manuais ou impactos. Não dependa da importação do schema completo para atualizar uma instalação que já contém dados.
 
 As atualizações do banco são manuais; o Codex não tem acesso direto ao banco de dados do ambiente.
+
+### Importação manual de notas de compra do AleNFE
+
+A tela `public/compras/importar_alenfe.php` consulta as notas do AleNFE e as coloca em uma caixa de entrada para revisão. A pessoa usuária confirma manualmente o fornecedor de `Mercados` e associa cada item a um produto de `Produtos`. O fornecedor é sugerido pelo CNPJ; os produtos podem ser sugeridos por mapeamentos já confirmados, código do item do fornecedor, NCM e descrição.
+
+A importação exige o XML completo da nota. Os campos `Tipo` (valor original de `ide/tpNF`) e `NaturezaOperacao` (valor de `ide/natOp`) são lidos do XML; não são presumidos. No Alesys, as tabelas `NFe` e `NFeItens` representam notas de compra. `Tipo` é informação fiscal da nota do fornecedor e não deve ser usado para classificar uma nota como compra ou venda.
+
+A importação grava a nota e seus itens em uma transação, impede duplicidade pela chave de acesso e memoriza os vínculos de produtos por CNPJ do fornecedor, código do item e NCM. **O fluxo atual não movimenta o estoque.** O parâmetro `ALENFE_COMPRA_ATUALIZAR_ESTOQUE_AUTOMATICAMENTE` é criado com valor `0` para manter qualquer atualização automática desativada.
+
+Para aplicar a estrutura a uma instalação que já existe:
+
+1. Faça backup do banco.
+2. Execute uma vez `database/migrations/20261110_alenfe_importacao_compras.sql` no banco `alesys`. Não é necessário importar o dump completo.
+3. Configure a integração ALENFE já usada pelo Alesys em `Configuracoes` (`ALENFE_URL` e `ALENFE_API_KEY`). Cadastre também `ALENFE_COMPRAS_EMPRESA_ID` com o identificador da empresa correspondente no AleNFE. Se o formato de consulta do ambiente for diferente, configure `ALENFE_COMPRAS_LIST_PATH` com o caminho completo relativo, incluindo os parâmetros.
+4. A rota de listagem e a rota de XML do AleNFE precisam aceitar a autenticação `x-api-key` e devolver a lista de notas/itens e o XML completo. O Alesys não envia nem armazena a chave no navegador. Caso AleNFE responda HTTP 401/403, a API Key ainda não está habilitada para essas rotas.
+
+Depois da migração, acesse **Compras → Importar notas do AleNFE**. Notas sem XML completo ficam sem confirmação de importação até que o XML esteja disponível. A primeira consulta busca até 100 notas por página conforme a rota configurada.
 
 ## Estrutura do projeto
 
