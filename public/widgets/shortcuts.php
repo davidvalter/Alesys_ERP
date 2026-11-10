@@ -9,7 +9,7 @@
         <a href="/vendas/pdv.php" class="dashboard-shortcut">
             <span class="dashboard-shortcut-icon is-green"><i class="fas fa-cash-register" aria-hidden="true"></i></span>
             <span><strong>Abrir PDV</strong><small>Registrar uma venda</small></span>
-            <i class="fas fa-arrow-up-right-from-square dashboard-shortcut-arrow" aria-hidden="true"></i>
+            <i class="fas fa-external-link-alt dashboard-shortcut-arrow" aria-hidden="true"></i>
         </a>
         <a href="/compras/produtos.php" class="dashboard-shortcut">
             <span class="dashboard-shortcut-icon is-blue"><i class="fas fa-box" aria-hidden="true"></i></span>
