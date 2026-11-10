@@ -128,7 +128,7 @@
         if (!container) return;
         const items = Array.isArray(alerts) ? alerts : [];
         if (!items.length) {
-            container.innerHTML = '<div class="dashboard-empty"><i class="fas fa-circle-check" aria-hidden="true"></i>Nenhuma das pendências monitoradas no momento.</div>';
+            container.innerHTML = '<div class="dashboard-empty"><i class="fas fa-check-circle" aria-hidden="true"></i>Nenhuma das pendências monitoradas no momento.</div>';
             return;
         }
         container.innerHTML = items.map((item) => {
