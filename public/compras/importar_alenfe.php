@@ -1,5 +1,9 @@
 <?php
 session_start();
+if (empty($_SESSION['alenfe_compras_csrf'])) {
+    $_SESSION['alenfe_compras_csrf'] = bin2hex(random_bytes(32));
+}
+$csrfToken = $_SESSION['alenfe_compras_csrf'];
 $moduloAtual = 'compras.notasfiscais';
 $tituloPagina = 'Importar compras do AleNFE';
 $tituloConteudo = 'Importação manual do AleNFE';
@@ -130,6 +134,7 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
 <?php require_once __DIR__ . '/../templates/footer_protected_v2.php'; ?>
 <script>
 (() => {
+    const csrfToken = <?= json_encode($csrfToken) ?>;
     const tbody = document.getElementById('listaNotas');
     const message = document.getElementById('mensagemImportacao');
     const modalEl = document.getElementById('modalRevisaoAleNFE');
@@ -150,7 +155,7 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
         message.className = 'alert alert-info';
         message.textContent = 'Consultando o AleNFE…';
         try {
-            const response = await fetch('/api/alenfe_compras_consultar.php', {credentials:'same-origin'});
+            const response = await fetch('/api/alenfe_compras_consultar.php', {method:'POST', credentials:'same-origin', headers:{'X-CSRF-Token':csrfToken}});
             const data = await response.json();
             if (!response.ok || !data.success) throw new Error(data.message || 'Falha ao consultar AleNFE.');
             showMessage(data.message + (data.ignoradas ? ' ' + data.ignoradas + ' registro(s) sem chave válida foram ignorados.' : ''), 'success');
@@ -260,7 +265,7 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
             const mappings = {};
             document.querySelectorAll('.produtoMap').forEach(s => mappings[s.dataset.item] = s.value);
             const response = await fetch('/api/alenfe_compras_importar.php', {
-                method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'},
+                method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},
                 body:JSON.stringify({importacaoId:activeNote.id, mercadoCodigo:document.getElementById('fornecedorAlesys').value, itens:mappings})
             });
             const data = await response.json();
