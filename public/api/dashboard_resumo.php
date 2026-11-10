@@ -48,9 +48,11 @@ try {
         $inicio = $hoje->modify('first day of this month')->setTime(0, 0);
         $fim = $inicio->modify('+1 month');
         $inicioAnterior = $inicio->modify('-1 month');
-        $fimAnterior = $inicio;
+        $ultimoDiaAnterior = (int) $inicioAnterior->modify('last day of this month')->format('j');
+        $diasComparaveis = min((int) $hoje->format('j'), $ultimoDiaAnterior);
+        $fimAnterior = $inicioAnterior->modify('+' . $diasComparaveis . ' days');
         $rotuloPeriodo = 'Este mês';
-        $rotuloComparacao = 'em relação ao mês anterior';
+        $rotuloComparacao = 'em relação ao mesmo período do mês anterior';
     } else {
         $inicio = $hoje->modify('-6 days');
         $fim = $amanha;
@@ -232,8 +234,8 @@ try {
     $adicionarAlerta($pedidosAbertos, 'Pedidos em aberto', 'Pedidos aguardando conclusão no PDV.', '/vendas/pdv.php', 'fa-receipt', 'warning');
     $adicionarAlerta($itensEmPreparo, 'Itens em preparo', 'Itens que ainda estão sendo preparados.', '/vendas/pdv.php', 'fa-fire', 'warning');
     $adicionarAlerta($nfcesAcompanhar, 'NFC-e para acompanhar', 'Documentos pendentes, em contingência ou com erro.', '/vendas/', 'fa-file-invoice', 'danger');
-    $adicionarAlerta($ofxPendentes, 'Lançamentos OFX pendentes', 'Linhas importadas aguardando conferência ou correção.', '/financeiro/importar_ofx.php', 'fa-building-columns', 'info');
-    $adicionarAlerta($lancamentosVencendo, 'Contas vencidas ou próximas', 'Lançamentos pendentes com vencimento até os próximos 7 dias.', '/financeiro/lancamentos.php', 'fa-calendar-exclamation', 'warning');
+    $adicionarAlerta($ofxPendentes, 'Lançamentos OFX pendentes', 'Linhas importadas aguardando conferência ou correção.', '/financeiro/importar_ofx.php', 'fa-university', 'info');
+    $adicionarAlerta($lancamentosVencendo, 'Lançamentos financeiros pendentes', 'Contas vencidas ou com vencimento até os próximos 7 dias.', '/financeiro/lancamentos.php', 'fa-calendar', 'warning');
     $adicionarAlerta($caixasAbertos, 'Fechamentos de caixa em aberto', 'Fechamentos que ainda precisam ser concluídos.', '/vendas/fechamento_caixa.php', 'fa-cash-register', 'warning');
 
     echo json_encode([
