@@ -154,6 +154,9 @@ foreach ($parametros as $p) {
                                         <?= htmlspecialchars($p['Descricao']) ?>
 
                                     </label>
+                                    <?php if ($p['Chave'] === 'ALENFE_COMPRA_ATUALIZAR_ESTOQUE_AUTOMATICAMENTE'): ?>
+                                        <small class="text-muted d-block mt-1">O controle está preparado para uso futuro. No momento, a importação do AleNFE não movimenta o estoque, mesmo que esta opção esteja ativa.</small>
+                                    <?php endif; ?>
 
                                 </div>
 
