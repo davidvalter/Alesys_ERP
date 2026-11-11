@@ -57,12 +57,7 @@ function alenfeComprasListPath(PDO $pdo): string
     if ($path !== '') {
         return str_starts_with($path, '/') ? $path : '/' . $path;
     }
-    $empresaId = alenfeComprasConfig($pdo, 'ALENFE_COMPRAS_EMPRESA_ID', '');
-    $query = ['page' => 1, 'limit' => 100];
-    if ($empresaId !== '') {
-        $query['empresaId'] = $empresaId;
-    }
-    return '/api/notas?' . http_build_query($query);
+    return '/api/integracoes/alesys/notas-compras?page=1&limit=100';
 }
 
 function alenfeComprasExtractXmlPayload(array $response): string
