@@ -11,7 +11,7 @@ if (!$note) alenfeComprasJson(['success' => false, 'message' => 'Nota não encon
 
 if (!$note['XMLCompleto'] || $note['TipoXML'] === null || !$note['NaturezaOperacaoXML']) {
     $externalId = rawurlencode((string)$note['AleNFEId']);
-    $response = alenfeHttp($pdo, 'GET', '/api/notas/' . $externalId . '/xml');
+    $response = alenfeHttp($pdo, 'GET', '/api/integracoes/alesys/notas-compras/' . $externalId . '/xml');
     if ((int)$response['status'] < 200 || (int)$response['status'] >= 300) {
         alenfeComprasJson([
             'success' => false,
