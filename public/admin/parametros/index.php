@@ -85,7 +85,12 @@ $parametros = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $grupos = [];
 
 foreach ($parametros as $p) {
-    $grupos[$p['Grupo']][] = $p;
+    // Este parâmetro afeta a rotina de estoque e fica agrupado no card Estoque,
+    // mesmo que uma instalação já tenha criado o registro em outro grupo.
+    $grupoExibicao = $p['Chave'] === 'ALENFE_COMPRA_ATUALIZAR_ESTOQUE_AUTOMATICAMENTE'
+        ? 'Estoque'
+        : ($p['Grupo'] ?: 'Outros');
+    $grupos[$grupoExibicao][] = $p;
 }
 
 ?>
