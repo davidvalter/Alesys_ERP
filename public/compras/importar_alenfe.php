@@ -34,8 +34,8 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
             <p class="text-muted mb-0">Consulte as notas centralizadas no AleNFE, confira os vínculos e confirme a importação no Alesys.</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="notas_fiscais.php" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Notas fiscais</a>
-            <button type="button" id="btnConsultar" class="btn btn-success" <?= $erroSchema ? 'disabled' : '' ?>>
+            <a href="notas_fiscais.php" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Notas fiscais</a>
+            <button type="button" id="btnConsultar" class="btn btn-sm btn-success" <?= $erroSchema ? 'disabled' : '' ?>>
                 <i class="fas fa-rotate me-1"></i>Consultar AleNFE
             </button>
         </div>
