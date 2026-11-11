@@ -67,8 +67,13 @@ CREATE TABLE IF NOT EXISTS `AleNFEComprasProdutoMapeamento` (
 
 INSERT INTO `Parametros` (`Chave`,`Valor`,`Descricao`,`Grupo`)
 SELECT 'ALENFE_COMPRA_ATUALIZAR_ESTOQUE_AUTOMATICAMENTE','0',
-       'Permite futuramente atualizar o estoque automaticamente ao importar uma nota de compra AleNFE. Desativado por padrão.',
-       'Integrações'
+       'Configura o uso futuro de atualização automática do estoque na importação do AleNFE. Ainda sem efeito: a importação atual não movimenta estoque.',
+       'Estoque'
 WHERE NOT EXISTS (
   SELECT 1 FROM `Parametros` WHERE `Chave`='ALENFE_COMPRA_ATUALIZAR_ESTOQUE_AUTOMATICAMENTE'
 );
+
+UPDATE `Parametros`
+SET `Grupo`='Estoque',
+    `Descricao`='Configura o uso futuro de atualização automática do estoque na importação do AleNFE. Ainda sem efeito: a importação atual não movimenta estoque.'
+WHERE `Chave`='ALENFE_COMPRA_ATUALIZAR_ESTOQUE_AUTOMATICAMENTE';
