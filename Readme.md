@@ -72,8 +72,8 @@ Para aplicar a estrutura a uma instalação que já existe:
 
 1. Faça backup do banco.
 2. Execute uma vez `database/migrations/20261110_alenfe_importacao_compras.sql` no banco `alesys`. Não é necessário importar o dump completo.
-3. Configure a integração ALENFE já usada pelo Alesys em `Configuracoes` (`ALENFE_URL` e `ALENFE_API_KEY`). Cadastre também `ALENFE_COMPRAS_EMPRESA_ID` com o identificador da empresa correspondente no AleNFE. Se o formato de consulta do ambiente for diferente, configure `ALENFE_COMPRAS_LIST_PATH` com o caminho completo relativo, incluindo os parâmetros.
-4. A rota de listagem e a rota de XML do AleNFE precisam aceitar a autenticação `x-api-key` e devolver a lista de notas/itens e o XML completo. O Alesys não envia nem armazena a chave no navegador. Caso AleNFE responda HTTP 401/403, a API Key ainda não está habilitada para essas rotas.
+3. Configure a integração ALENFE já usada pelo Alesys em `Configuracoes` (`ALENFE_URL` e `ALENFE_API_KEY`). A empresa é identificada pela API Key, portanto não é necessário enviar `empresaId`. Se o formato de consulta do ambiente for diferente, configure `ALENFE_COMPRAS_LIST_PATH` com o caminho completo relativo, incluindo os parâmetros.
+4. O Alesys consulta `GET /api/integracoes/alesys/notas-compras?page=1&limit=100` e obtém XML em `GET /api/integracoes/alesys/notas-compras/{id}/xml`. As duas rotas usam o header `x-api-key`; a chave é enviada apenas pelo servidor Alesys e não fica exposta no navegador.
 
 Depois da migração, acesse **Compras → Importar notas do AleNFE**. Notas sem XML completo ficam sem confirmação de importação até que o XML esteja disponível. A primeira consulta busca até 100 notas por página conforme a rota configurada.
 
