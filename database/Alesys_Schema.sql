@@ -1048,11 +1048,18 @@ WHERE `Chave`='ALENFE_COMPRA_ATUALIZAR_ESTOQUE_AUTOMATICAMENTE';
 --      php database/migrar_miniaturas.php
 --    O script gera miniaturas a partir das fotos legadas existentes e
 --    associa produtos/pratos à tabela Midias. Requer GD ou Imagick no PHP.
--- 4. Confira o relatório do script antes de remover os campos legados.
+-- 4. Confira o relatório do script e as miniaturas no PDV/cadastros.
+-- 5. Depois de confirmar que todos os vínculos estão corretos, remova os
+--    caminhos legados executando manualmente:
+--      ALTER TABLE Pratos DROP COLUMN Foto;
+--      ALTER TABLE Cardapio DROP COLUMN Imagem;
 --
 -- Pratos.Foto e Cardapio.Imagem são mantidos temporariamente para permitir
 -- a migração dos caminhos atuais. O código novo deixa de gravar/consultar
 -- esses campos. Não os remova antes de concluir e conferir a migração.
+--
+-- Na tabela Midias, o único dado de imagem é CaminhoMiniatura. Os arquivos,
+-- inclusive os originais, ficam no filesystem dentro de public/uploads.
 -- =====================================================================
 
 CREATE TABLE IF NOT EXISTS `Midias` (
