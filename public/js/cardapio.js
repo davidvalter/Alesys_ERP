@@ -1,4 +1,5 @@
 let tabela;
+const IMAGE_PLACEHOLDER = '/images/no-image.svg';
 
 document.addEventListener('DOMContentLoaded', () => {
     carregarTabela();
@@ -62,26 +63,32 @@ function carregarTabela() {
 }
 
 async function abrirModal(dados = null) {
-    await Promise.all([carregarProdutos(), carregarPratos()]);
-
     const form = document.getElementById('formCardapio');
+    const tipo = dados?.TipoItem || '';
     form.reset();
     document.getElementById('Id').value = dados?.Id || '';
     document.getElementById('Nome').value = dados?.Nome || '';
-    document.getElementById('TipoItem').value = dados?.TipoItem || '';
+    document.getElementById('TipoItem').value = tipo;
     document.getElementById('Categoria').value = dados?.Categoria || '';
     document.getElementById('PrecoVenda').value = dados?.PrecoVenda ?? '';
     document.getElementById('Ativo').value = dados?.Ativo ?? 1;
+    document.getElementById('ProdutoId').replaceChildren(new Option('Carregando...', ''));
+    document.getElementById('PratoId').replaceChildren(new Option('Carregando...', ''));
+    toggleTipo(tipo);
+    atualizarPreviewImagem(dados?.Imagem || '');
+    document.getElementById('modalTitle').textContent = dados ? 'Editar Item' : 'Novo Item';
+
+    // Exibe o formulário de imediato; a carga das listas acontece em paralelo.
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modalCardapio')).show();
+    await Promise.all([carregarProdutos(), carregarPratos()]);
 
     if (dados) {
         document.getElementById('ProdutoId').value = dados.ProdutoId || '';
         document.getElementById('PratoId').value = dados.PratoId || '';
     }
 
-    toggleTipo(dados?.TipoItem || '');
+    toggleTipo(tipo);
     atualizarPreviewImagem(dados?.Imagem || '');
-    document.getElementById('modalTitle').textContent = dados ? 'Editar Item' : 'Novo Item';
-    bootstrap.Modal.getOrCreateInstance(document.getElementById('modalCardapio')).show();
 }
 
 function toggleTipo(tipo) {
@@ -96,7 +103,11 @@ function atualizarPreviewImagem(fallback = '') {
         ? (document.getElementById(idSelect).selectedOptions[0]?.dataset.imagem || '')
         : '';
     const preview = document.getElementById('previewImagem');
-    preview.src = fallback || imagemAssociada || '/images/no-image.png';
+    preview.onerror = () => {
+        preview.onerror = null;
+        preview.src = IMAGE_PLACEHOLDER;
+    };
+    preview.src = fallback || imagemAssociada || IMAGE_PLACEHOLDER;
 }
 
 async function carregarProdutos() {
