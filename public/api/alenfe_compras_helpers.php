@@ -92,18 +92,43 @@ function alenfeComprasParseXml(string $xml): ?array
         return null;
     }
     $xpath = new DOMXPath($dom);
-    $tpNF = $xpath->query('//*[local-name()="ide"]/*[local-name()="tpNF"]')->item(0)?->textContent;
-    $natureza = $xpath->query('//*[local-name()="ide"]/*[local-name()="natOp"]')->item(0)?->textContent;
-    $emitCnpj = $xpath->query('//*[local-name()="emit"]/*[local-name()="CNPJ"]')->item(0)?->textContent;
-    $emitNome = $xpath->query('//*[local-name()="emit"]/*[local-name()="xNome"]')->item(0)?->textContent;
-    if ($tpNF === null || !in_array(trim($tpNF), ['0', '1'], true) || $natureza === null || trim($natureza) === '') {
+    $value = static function (string $path) use ($xpath): ?string {
+        $node = $xpath->query($path)->item(0);
+        $text = $node ? trim((string)$node->textContent) : '';
+        return $text !== '' ? $text : null;
+    };
+
+    $tpNF = $value('//*[local-name()="ide"]/*[local-name()="tpNF"]');
+    $natureza = $value('//*[local-name()="ide"]/*[local-name()="natOp"]');
+    $emitCnpj = $value('//*[local-name()="emit"]/*[local-name()="CNPJ"]');
+    $emitNome = $value('//*[local-name()="emit"]/*[local-name()="xNome"]');
+    $emitFantasia = $value('//*[local-name()="emit"]/*[local-name()="xFant"]');
+    $inscricaoEstadual = $value('//*[local-name()="emit"]/*[local-name()="IE"]');
+    $logradouro = $value('//*[local-name()="enderEmit"]/*[local-name()="xLgr"]');
+    $numero = $value('//*[local-name()="enderEmit"]/*[local-name()="nro"]');
+    $bairro = $value('//*[local-name()="enderEmit"]/*[local-name()="xBairro"]');
+    $cep = $value('//*[local-name()="enderEmit"]/*[local-name()="CEP"]');
+    $municipio = $value('//*[local-name()="enderEmit"]/*[local-name()="xMun"]');
+    $estado = $value('//*[local-name()="enderEmit"]/*[local-name()="UF"]');
+    $telefone = $value('//*[local-name()="enderEmit"]/*[local-name()="fone"]');
+
+    if ($tpNF === null || !in_array($tpNF, ['0', '1'], true) || $natureza === null) {
         return null;
     }
+
+    $enderecoPartes = array_filter([$logradouro, $numero, $bairro]);
     return [
-        'tipo' => (int)trim($tpNF),
-        'natureza' => trim($natureza),
+        'tipo' => (int)$tpNF,
+        'natureza' => $natureza,
         'emitCnpj' => $emitCnpj ? preg_replace('/\D+/', '', $emitCnpj) : null,
-        'emitNome' => $emitNome ? trim($emitNome) : null,
+        'emitNome' => $emitNome,
+        'emitFantasia' => $emitFantasia,
+        'inscricaoEstadual' => $inscricaoEstadual,
+        'endereco' => $enderecoPartes ? implode(', ', $enderecoPartes) : null,
+        'cep' => $cep ? preg_replace('/\D+/', '', $cep) : null,
+        'municipio' => $municipio,
+        'estado' => $estado,
+        'telefone' => $telefone ? preg_replace('/\D+/', '', $telefone) : null,
     ];
 }
 
