@@ -21,7 +21,6 @@ try {
             LEFT JOIN Pratos pr ON c.PratoId = pr.Id
             LEFT JOIN Midias mp ON mp.Id = p.ImagemId
             LEFT JOIN Midias mpr ON mpr.Id = pr.ImagemId
-            WHERE c.Ativo = 1
             ORDER BY c.Categoria, c.Nome";
     $dados = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode(['success' => true, 'data' => $dados], JSON_UNESCAPED_UNICODE);
