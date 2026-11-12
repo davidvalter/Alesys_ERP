@@ -1034,3 +1034,42 @@ WHERE `Chave`='ALENFE_COMPRA_ATUALIZAR_ESTOQUE_AUTOMATICAMENTE';
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 
+
+
+-- =====================================================================
+-- EVOLUÇÃO: armazenamento centralizado das miniaturas de produtos/pratos
+-- Arquivos ficam no servidor em /public/uploads/produtos ou /pratos.
+-- O banco armazena somente o caminho da miniatura em Midias.
+--
+-- IMPLANTAÇÃO EM BANCO EXISTENTE:
+-- 1. Faça backup do banco.
+-- 2. Execute somente este bloco uma vez (não reexecute o dump completo).
+-- 3. No diretório raiz do projeto, rode:
+--      php database/migrar_miniaturas.php
+--    O script gera miniaturas a partir das fotos legadas existentes e
+--    associa produtos/pratos à tabela Midias. Requer GD ou Imagick no PHP.
+-- 4. Confira o relatório do script antes de remover os campos legados.
+--
+-- Pratos.Foto e Cardapio.Imagem são mantidos temporariamente para permitir
+-- a migração dos caminhos atuais. O código novo deixa de gravar/consultar
+-- esses campos. Não os remova antes de concluir e conferir a migração.
+-- =====================================================================
+
+CREATE TABLE IF NOT EXISTS `Midias` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `CaminhoMiniatura` varchar(500) NOT NULL,
+  PRIMARY KEY (`Id`),
+  UNIQUE KEY `UQ_Midias_CaminhoMiniatura` (`CaminhoMiniatura`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `Produtos`
+  ADD COLUMN `ImagemId` int(11) DEFAULT NULL,
+  ADD KEY `IX_Produtos_ImagemId` (`ImagemId`),
+  ADD CONSTRAINT `FK_Produtos_Midia`
+    FOREIGN KEY (`ImagemId`) REFERENCES `Midias` (`Id`) ON DELETE SET NULL;
+
+ALTER TABLE `Pratos`
+  ADD COLUMN `ImagemId` int(11) DEFAULT NULL,
+  ADD KEY `IX_Pratos_ImagemId` (`ImagemId`),
+  ADD CONSTRAINT `FK_Pratos_Midia`
+    FOREIGN KEY (`ImagemId`) REFERENCES `Midias` (`Id`) ON DELETE SET NULL;
