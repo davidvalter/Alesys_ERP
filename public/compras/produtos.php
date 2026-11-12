@@ -168,11 +168,21 @@ try {
             </div>
             <!-- BODY -->
             <div class="modal-body">
-                <form id="formProduto">
+                <form id="formProduto" enctype="multipart/form-data">
                     <input type="hidden" id="produtoCodigo" name="Codigo">
                     <div class="mb-3">
                         <label class="form-label">Nome*</label>
                         <input type="text" id="nome" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Imagem do produto/insumo</label>
+                        <input type="file" id="imagemProdutoFile" name="ImagemFile" class="form-control"
+                            accept="image/jpeg,image/png,image/webp">
+                        <div class="mt-2">
+                            <img id="imagemProdutoPreview" src="/images/no-image.png" alt="Miniatura do produto"
+                                width="120" height="120" style="object-fit:contain;border-radius:8px;">
+                        </div>
+                        <small class="text-muted">A imagem será redimensionada e armazenada no servidor.</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Código de Barras</label>
