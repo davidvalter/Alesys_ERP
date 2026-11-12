@@ -6,6 +6,10 @@ session_start();
 $moduloAtual = 'vendas';
 $tituloPagina = 'PDV';
 $tituloConteudo = 'Ponto de Venda';
+$extraCss = '
+<link rel="stylesheet" href="/styles/pdv.css">
+<link rel="stylesheet" href="/styles/pdv_nfce.css">
+';
 
 require_once __DIR__ . '/../conf/autenticacao.php';
 require_once __DIR__ . '/../../configs/database.php';
@@ -203,11 +207,10 @@ $content = ob_get_clean();
 // Renderiza layout
 include __DIR__ . '/../templates/base_protected_v2.php';
 
-// Footer (fecha HTML)
-require __DIR__ . '/../templates/footer_protected_v2.php';
 ?>
-
 <script src="/js/pdv.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/js/pdv.js') ?>"></script>
 <script src="/js/pdv_nfce.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/js/pdv_nfce.js') ?>"></script>
-<link rel="stylesheet" href="/styles/pdv.css">
-<link rel="stylesheet" href="/styles/pdv_nfce.css">
+<?php
+// Footer fecha a estrutura HTML do template.
+require __DIR__ . '/../templates/footer_protected_v2.php';
+?>
