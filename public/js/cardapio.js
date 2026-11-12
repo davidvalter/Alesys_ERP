@@ -2,12 +2,25 @@ let tabela;
 const IMAGE_PLACEHOLDER = '/images/no-image.svg';
 
 document.addEventListener('DOMContentLoaded', () => {
-    carregarTabela();
+    // Registra os eventos primeiro para que uma falha na tabela não bloqueie o modal.
     bindEventos();
+    try {
+        carregarTabela();
+    } catch (error) {
+        console.error('Erro ao inicializar a tabela do cardápio:', error);
+    }
 });
 
 function bindEventos() {
-    document.getElementById('btnNovo')?.addEventListener('click', () => abrirModal());
+    document.getElementById('btnNovo')?.addEventListener('click', async event => {
+        event.preventDefault();
+        try {
+            await abrirModal();
+        } catch (error) {
+            console.error('Erro ao abrir o modal do cardápio:', error);
+            showToast(error.message || 'Não foi possível abrir o formulário.', 'danger');
+        }
+    });
 
     document.getElementById('TipoItem')?.addEventListener('change', event => {
         toggleTipo(event.target.value);
@@ -78,8 +91,8 @@ async function abrirModal(dados = null) {
     atualizarPreviewImagem(dados?.Imagem || '');
     document.getElementById('modalTitle').textContent = dados ? 'Editar Item' : 'Novo Item';
 
-    // Exibe o formulário de imediato; a carga das listas acontece em paralelo.
-    bootstrap.Modal.getOrCreateInstance(document.getElementById('modalCardapio')).show();
+    // Usa a API explícita do Bootstrap 5, já adotada pelo módulo de Produtos.
+    obterModalCardapio().show();
     await Promise.all([carregarProdutos(), carregarPratos()]);
 
     if (dados) {
@@ -89,6 +102,15 @@ async function abrirModal(dados = null) {
 
     toggleTipo(tipo);
     atualizarPreviewImagem(dados?.Imagem || '');
+}
+
+function obterModalCardapio() {
+    const modalElement = document.getElementById('modalCardapio');
+    const Modal = window.bootstrap && window.bootstrap.Modal;
+    if (!Modal) {
+        throw new Error('O componente Modal do Bootstrap não foi carregado.');
+    }
+    return Modal.getInstance(modalElement) || new Modal(modalElement);
 }
 
 function toggleTipo(tipo) {
@@ -170,7 +192,7 @@ async function salvar() {
         const json = await response.json();
         if (!response.ok || !json.success) throw new Error(json.message || 'Erro ao salvar o item.');
 
-        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalCardapio')).hide();
+        obterModalCardapio().hide();
         showToast(json.message || 'Item salvo com sucesso.', 'success');
         tabela.ajax.reload(null, false);
     } catch (error) {
