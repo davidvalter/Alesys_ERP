@@ -79,7 +79,11 @@ try {
     $pdo->commit();
 
     if ($oldImageId && $newImageId !== $oldImageId) {
-        ImageMediaStorage::deleteIfUnused($pdo, $oldImageId);
+        try {
+            ImageMediaStorage::deleteIfUnused($pdo, $oldImageId);
+        } catch (Throwable $cleanupError) {
+            error_log('Não foi possível limpar a miniatura antiga do prato: ' . $cleanupError->getMessage());
+        }
     }
 
     echo json_encode(['success' => true, 'id' => $id], JSON_UNESCAPED_UNICODE);
