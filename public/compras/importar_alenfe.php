@@ -152,7 +152,7 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
             return JSON.parse(raw);
         } catch {
             const path = new URL(response.url).pathname;
-            const preview = raw.replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 180);
+            const preview = raw.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 180);
             throw new Error('O endpoint ' + path + ' respondeu HTTP ' + response.status + ' com HTML ou conteúdo não JSON. Verifique se o arquivo PHP está publicado dentro de public/ e se o servidor aponta para essa pasta.' + (preview ? ' Resposta: ' + preview : ''));
         }
     };
