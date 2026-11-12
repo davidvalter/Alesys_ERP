@@ -150,7 +150,7 @@ try {
                     <div class="mb-3">
                         <label class="form-label">Imagem do produto ou prato</label>
                         <div class="d-flex align-items-center gap-3">
-                            <img id="previewImagem" src="/images/no-image.png" alt="Miniatura herdada do produto ou prato"
+                            <img id="previewImagem" src="/images/no-image.svg" alt="Miniatura herdada do produto ou prato"
                                 width="96" height="96" style="object-fit:contain;border-radius:8px;">
                             <small class="text-muted">A imagem é herdada do produto ou prato vinculado. Para alterá-la, edite o cadastro correspondente.</small>
                         </div>
