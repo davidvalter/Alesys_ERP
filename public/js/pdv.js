@@ -117,7 +117,7 @@ const PDV = {
 
         produtos.forEach(p => {
 
-            const img = this.escapeHtml(p.Imagem || '/images/no-image.png');
+            const img = this.escapeHtml(p.Imagem || '/images/no-image.svg');
             const nome = this.escapeHtml(p.Nome);
 
             grid.innerHTML += `
@@ -126,7 +126,7 @@ const PDV = {
 
                         <div class="produto-img-wrapper">
                             <img src="${img}" class="produto-img" alt="${nome}" width="160" height="100" loading="lazy" decoding="async"
-                                onerror="this.onerror=null;this.src='/images/no-image.png'">
+                                onerror="this.onerror=null;this.src='/images/no-image.svg'">
                         </div>
 
                         <div class="card-body text-center">
