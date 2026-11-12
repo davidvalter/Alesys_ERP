@@ -179,7 +179,7 @@ try {
                         <input type="file" id="imagemProdutoFile" name="ImagemFile" class="form-control"
                             accept="image/jpeg,image/png,image/webp">
                         <div class="mt-2">
-                            <img id="imagemProdutoPreview" src="/images/no-image.png" alt="Miniatura do produto"
+                            <img id="imagemProdutoPreview" src="/images/no-image.svg" alt="Miniatura do produto"
                                 width="120" height="120" style="object-fit:contain;border-radius:8px;">
                         </div>
                         <small class="text-muted">A imagem será redimensionada e armazenada no servidor.</small>
