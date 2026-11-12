@@ -1,61 +1,52 @@
 <?php
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../configs/database.php';
+require_once __DIR__ . '/../../includes/ImageMediaStorage.php';
 
-$input = json_decode(file_get_contents('php://input'), true);
+$input = json_decode(file_get_contents('php://input'), true) ?: [];
 
 try {
     $pdo = getDB();
-    
-    if (empty($input['Codigo'])) {
-        throw new Exception('Código do produto é obrigatório');
+    if (empty($input['Codigo']) || (int)$input['Codigo'] < 1) {
+        throw new InvalidArgumentException('Código do produto é obrigatório.');
     }
-    
-    // Inicia transação
+    $codigo = (int)$input['Codigo'];
+
     $pdo->beginTransaction();
-    
-    try {
-        // 1. Remove registros vinculados em ProdutoPrecos
-        $pdo->prepare("DELETE FROM ProdutoPrecos WHERE fk_Produtos_Codigo = ?")
-            ->execute([$input['Codigo']]);
-        
-        // 2. Remove registros vinculados em NFeItens
-        $pdo->prepare("DELETE FROM NFeItens WHERE fk_Produtos_Codigo = ?")
-            ->execute([$input['Codigo']]);
-        
-        // 3. Remove o produto
-        $stmt = $pdo->prepare("DELETE FROM Produtos WHERE Codigo = ?");
-        $stmt->execute([$input['Codigo']]);
-        
-        if ($stmt->rowCount() > 0) {
-            $pdo->commit();
-            echo json_encode([
-                'success' => true,
-                'message' => 'Produto excluído com sucesso!'
-            ]);
-        } else {
-            $pdo->rollBack();
-            throw new Exception('Produto não encontrado');
-        }
-    } catch (Exception $e) {
-        $pdo->rollBack();
-        throw $e;
+    $stmtMedia = $pdo->prepare('SELECT ImagemId FROM Produtos WHERE Codigo = ?');
+    $stmtMedia->execute([$codigo]);
+    $imageId = $stmtMedia->fetchColumn();
+    if ($imageId === false) {
+        throw new RuntimeException('Produto não encontrado.');
     }
-    
-} catch (PDOException $e) {
-    error_log('PDOException ao excluir produto: ' . $e->getMessage());
-    http_response_code(500);
+
+    $pdo->prepare('DELETE FROM ProdutoPrecos WHERE fk_Produtos_Codigo = ?')->execute([$codigo]);
+    $pdo->prepare('DELETE FROM NFeItens WHERE fk_Produtos_Codigo = ?')->execute([$codigo]);
+    $stmt = $pdo->prepare('DELETE FROM Produtos WHERE Codigo = ?');
+    $stmt->execute([$codigo]);
+    if ($stmt->rowCount() < 1) {
+        throw new RuntimeException('Produto não encontrado.');
+    }
+    $pdo->commit();
+
+    if ($imageId !== null) {
+        try {
+            ImageMediaStorage::deleteIfUnused($pdo, (int)$imageId);
+        } catch (Throwable $cleanupError) {
+            error_log('Não foi possível limpar a mídia do produto ' . $codigo . ': ' . $cleanupError->getMessage());
+        }
+    }
+
+    echo json_encode(['success' => true, 'message' => 'Produto excluído com sucesso!'], JSON_UNESCAPED_UNICODE);
+} catch (Throwable $e) {
+    if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    error_log('Erro ao excluir produto: ' . $e->getMessage());
+    $isUserError = $e instanceof InvalidArgumentException;
+    http_response_code($isUserError ? 400 : 500);
     echo json_encode([
         'success' => false,
-        'message' => 'Erro no banco de dados',
-        'error_details' => $e->getMessage()
-    ]);
-} catch (Exception $e) {
-    error_log('Exception ao excluir produto: ' . $e->getMessage());
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage()
-    ]);
+        'message' => $isUserError ? $e->getMessage() : 'Não foi possível excluir o produto.'
+    ], JSON_UNESCAPED_UNICODE);
 }
-?>
