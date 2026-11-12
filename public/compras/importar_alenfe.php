@@ -209,7 +209,8 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
             if (activeNote.MercadoCodigoSugerido) supplier.value = activeNote.MercadoCodigoSugerido;
             const sourceCnpj = (activeNote.FornecedorCNPJ || '').replace(/\D/g,'');
             const matched = data.mercados.find(m => (m.CNPJ || '').replace(/\D/g,'') === sourceCnpj);
-            document.getElementById('avisoCnpj').textContent = matched ? 'Correspondência automática pelo CNPJ: ' + matched.CNPJ : 'Não há fornecedor cadastrado com este CNPJ. Selecione manualmente e confira o cadastro.';
+            document.getElementById('avisoCnpj').textContent = matched ? 'Correspondência automática pelo CNPJ: ' + matched.CNPJ : 'Não há fornecedor cadastrado com este CNPJ. Selecione manualmente ou cadastre um novo fornecedor.';
+            document.getElementById('btnNovoFornecedor').classList.toggle('d-none', Boolean(matched));
             document.getElementById('itensNota').innerHTML = activeItems.map((item, index) => {
                 const options = item.sugestoes.map(p => '<option value="'+esc(p.Codigo)+'">'+esc(p.Nome)+' · '+esc(p.UnidadeMedida || 'UN')+(p.NCM ? ' · NCM '+esc(p.NCM) : '')+'</option>').join('');
                 return '<tr><td><strong>'+esc(item.Descricao)+'</strong><small class="text-muted d-block">Código '+esc(item.CodigoFornecedor || '—')+' · NCM '+esc(item.NCM || '—')+' · CFOP '+esc(item.CFOP || '—')+'</small></td><td>'+Number(item.Quantidade).toLocaleString('pt-BR')+' × '+Number(item.ValorUnitario).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'</td><td><input type="search" class="form-control form-control-sm mb-1 produtoBusca" data-item="'+esc(item.Id)+'" placeholder="Buscar produto por nome, código ou NCM"><select class="form-select form-select-sm produtoMap" data-item="'+esc(item.Id)+'"><option value="">Selecione produto…</option>'+options+'</select></td></tr>';
@@ -273,6 +274,35 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
     tbody?.addEventListener('click', e => {
         const button = e.target.closest('.btnRevisar');
         if (button) review(button.dataset.id);
+    });
+
+    document.getElementById('btnNovoFornecedor')?.addEventListener('click', () => {
+        if (!activeNote || !modal) return;
+        modalEl.addEventListener('hidden.bs.modal', () => {
+            const fornecedor = activeNote.fornecedorDados || {};
+            const abriu = window.abrirModalNovoFornecedor?.(
+                fornecedor,
+                (salvo) => {
+                    const select = document.getElementById('fornecedorAlesys');
+                    const codigo = String(salvo.Codigo);
+                    let option = [...select.options].find(item => item.value === codigo);
+                    if (!option) {
+                        const nome = salvo.Nome || salvo.RazaoSocial || 'Novo fornecedor';
+                        option = new Option(nome + ' · ' + (salvo.CNPJ || fornecedor.CNPJ || ''), codigo);
+                        select.add(option);
+                    }
+                    select.value = codigo;
+                    activeNote.MercadoCodigoSugerido = Number(codigo);
+                    document.getElementById('avisoCnpj').textContent = 'Fornecedor cadastrado com os dados do XML e selecionado para esta nota.';
+                    document.getElementById('btnNovoFornecedor').classList.add('d-none');
+                    updateConfirmState();
+                    modal.show();
+                },
+                () => modal.show()
+            );
+            if (!abriu) modal.show();
+        }, {once:true});
+        modal.hide();
     });
     document.getElementById('btnConfirmarImportacao').addEventListener('click', async (event) => {
         const button = event.currentTarget;
