@@ -38,6 +38,9 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
             <button type="button" id="btnConsultar" class="btn btn-sm btn-success" <?= $erroSchema ? 'disabled' : '' ?>>
                 <i class="fas fa-rotate me-1"></i>Consultar AleNFE
             </button>
+            <button type="button" id="btnImportarAutomatico" class="btn btn-sm btn-outline-primary" <?= $erroSchema ? 'disabled' : '' ?>>
+                <i class="fas fa-wand-magic-sparkles me-1"></i>Importar conciliadas
+            </button>
         </div>
     </div>
 
@@ -164,6 +167,36 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
         }
     };
     const loadList = () => location.reload();
+
+    document.getElementById('btnImportarAutomatico')?.addEventListener('click', async (event) => {
+        if (!confirm('Consultar o AleNFE e importar as notas pendentes cujo fornecedor e todos os produtos já tenham correspondência por CNPJ e mapeamento salvo? Notas sem vínculo suficiente ficarão pendentes. O estoque não será alterado.')) return;
+        const button = event.currentTarget;
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Importando…';
+        message.className = 'alert alert-info';
+        message.textContent = 'Consultando notas e verificando os vínculos salvos…';
+        try {
+            const syncResponse = await fetch('/api/alenfe_compras_consultar.php', {
+                method:'POST', credentials:'same-origin', headers:{'X-CSRF-Token':csrfToken}
+            });
+            const syncData = await parseApiResponse(syncResponse);
+            if (!syncResponse.ok || !syncData.success) throw new Error(syncData.message || 'Falha ao consultar o AleNFE.');
+
+            const response = await fetch('/api/alenfe_compras_importar_automatico.php', {
+                method:'POST', credentials:'same-origin', headers:{'X-CSRF-Token':csrfToken}
+            });
+            const data = await parseApiResponse(response);
+            if (!response.ok || !data.success) throw new Error(data.message || 'Falha na importação automática.');
+            const details = Array.isArray(data.detalhes) && data.detalhes.length ? '\\n' + data.detalhes.join('\\n') : '';
+            showMessage(data.message + details, data.falhas ? 'warning' : 'success');
+            setTimeout(loadList, 1200);
+        } catch (error) {
+            showMessage(error.message, 'danger');
+        } finally {
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-wand-magic-sparkles me-1"></i>Importar conciliadas';
+        }
+    });
 
     document.getElementById('btnConsultar')?.addEventListener('click', async (event) => {
         const button = event.currentTarget;
