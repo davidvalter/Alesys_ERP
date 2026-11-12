@@ -207,8 +207,12 @@ async function salvar() {
 }
 
 function editar(id) {
-    const item = tabela.rows().data().toArray().find(row => Number(row.Id) === Number(id));
-    if (item) abrirModal(item);
+    const item = tabela?.rows().data().toArray().find(row => Number(row.Id) === Number(id));
+    if (!item) return;
+    abrirModal(item).catch(error => {
+        console.error('Erro ao abrir a edição do item do cardápio:', error);
+        showToast(error.message || 'Não foi possível abrir o formulário.', 'danger');
+    });
 }
 
 async function remover(id) {
