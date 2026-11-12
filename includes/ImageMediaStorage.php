@@ -9,6 +9,7 @@ final class ImageMediaStorage
 {
     const MAX_UPLOAD_BYTES = 10485760;
     const MAX_IMAGE_PIXELS = 40000000;
+    const MAX_LEGACY_IMAGE_PIXELS = 70000000;
     const THUMBNAIL_SIZE = 640;
 
     public static function storeUploaded(array $file, string $owner): string
@@ -68,10 +69,10 @@ final class ImageMediaStorage
         $imageId = bin2hex(random_bytes(16));
         $thumbnailDirectory = self::ownerDirectory($owner) . DIRECTORY_SEPARATOR . 'miniaturas';
         self::ensureDirectory($thumbnailDirectory);
-        return self::createThumbnail($sourcePath, $thumbnailDirectory, $owner, $imageId);
+        return self::createThumbnail($sourcePath, $thumbnailDirectory, $owner, $imageId, self::MAX_LEGACY_IMAGE_PIXELS);
     }
 
-    private static function createThumbnail(string $sourcePath, string $thumbnailDirectory, string $owner, string $imageId): string
+    private static function createThumbnail(string $sourcePath, string $thumbnailDirectory, string $owner, string $imageId, int $maxPixels = self::MAX_IMAGE_PIXELS): string
     {
         $info = @getimagesize($sourcePath);
         if (!$info || empty($info['mime'])) {
@@ -83,7 +84,7 @@ final class ImageMediaStorage
         }
         $width = (int)$info[0];
         $height = (int)$info[1];
-        if ($width < 1 || $height < 1 || ($width * $height) > self::MAX_IMAGE_PIXELS) {
+        if ($width < 1 || $height < 1 || ($width * $height) > $maxPixels) {
             throw new RuntimeException('As dimensões da imagem são inválidas ou muito grandes.');
         }
 
@@ -94,7 +95,7 @@ final class ImageMediaStorage
         if (class_exists('Imagick')) {
             self::createWithImagick($sourcePath, $destination, $useWebp);
         } elseif (function_exists('imagecreatefromstring') && function_exists('imagecopyresampled')) {
-            self::createWithGd($sourcePath, $destination, $width, $height, $useWebp);
+            self::createWithGd($sourcePath, $destination, $width, $height, $mime, $useWebp);
         } else {
             throw new RuntimeException('Ative a extensão GD ou Imagick do PHP para gerar miniaturas.');
         }
@@ -133,10 +134,16 @@ final class ImageMediaStorage
         }
     }
 
-    private static function createWithGd(string $sourcePath, string $destination, int $width, int $height, bool $useWebp): void
+    private static function createWithGd(string $sourcePath, string $destination, int $width, int $height, string $mime, bool $useWebp): void
     {
-        $bytes = @file_get_contents($sourcePath);
-        $source = $bytes !== false ? @imagecreatefromstring($bytes) : false;
+        $loader = [
+            'image/jpeg' => 'imagecreatefromjpeg',
+            'image/png' => 'imagecreatefrompng',
+            'image/webp' => 'imagecreatefromwebp'
+        ][$mime] ?? null;
+        $source = $loader !== null && function_exists($loader)
+            ? @$loader($sourcePath)
+            : false;
         if (!$source) {
             throw new RuntimeException('Não foi possível decodificar a imagem enviada.');
         }
