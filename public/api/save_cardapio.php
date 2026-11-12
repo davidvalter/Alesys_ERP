@@ -1,133 +1,97 @@
 <?php
 // public/api/save_cardapio.php
-
-header('Content-Type: application/json');
-
+header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../configs/database.php';
 
 try {
-    $db = getDB();
-
-    // Recebe JSON
+    $pdo = getDB();
     $input = $_POST;
-
-    // Validação básica
     if (!$input) {
-        throw new Exception('Dados inválidos');
+        throw new InvalidArgumentException('Dados inválidos.');
     }
 
-    $id = $input['Id'] ?? null;
+    $id = !empty($input['Id']) ? (int)$input['Id'] : null;
     $nome = trim($input['Nome'] ?? '');
     $tipoItem = $input['TipoItem'] ?? '';
-    $produtoId = $input['ProdutoId'] ?? null;
-    $pratoId = $input['PratoId'] ?? null;
-    $preco = $input['PrecoVenda'] ?? 0;
-    $categoria = $input['Categoria'] ?? null;
-    $imagem = $input['Imagem'] ?? null;
-    $ativo = $input['Ativo'] ?? 1;
+    $produtoId = !empty($input['ProdutoId']) ? (int)$input['ProdutoId'] : null;
+    $pratoId = !empty($input['PratoId']) ? (int)$input['PratoId'] : null;
+    $preco = isset($input['PrecoVenda']) ? (float)$input['PrecoVenda'] : -1;
+    $categoria = trim($input['Categoria'] ?? '');
+    $ativo = isset($input['Ativo']) ? (int)$input['Ativo'] : 1;
 
-    // Validações
-    if (!$nome) {
-        throw new Exception('Nome é obrigatório');
+    if ($nome === '') {
+        throw new InvalidArgumentException('Nome é obrigatório.');
     }
-
-    if (!in_array($tipoItem, ['produto', 'prato'])) {
-        throw new Exception('TipoItem inválido');
+    if (!in_array($tipoItem, ['produto', 'prato'], true)) {
+        throw new InvalidArgumentException('Tipo de item inválido.');
     }
-
+    if ($preco < 0) {
+        throw new InvalidArgumentException('O preço deve ser igual ou maior que zero.');
+    }
     if ($tipoItem === 'produto' && !$produtoId) {
-        throw new Exception('ProdutoId é obrigatório para tipo produto');
+        throw new InvalidArgumentException('Selecione o produto vinculado.');
     }
-
     if ($tipoItem === 'prato' && !$pratoId) {
-        throw new Exception('PratoId é obrigatório para tipo prato');
+        throw new InvalidArgumentException('Selecione o prato vinculado.');
+    }
+    if (!in_array($ativo, [0, 1], true)) {
+        throw new InvalidArgumentException('Status inválido.');
     }
 
-    $imagem = null;
-
-    if (isset($_FILES['ImagemFile']) && $_FILES['ImagemFile']['error'] === UPLOAD_ERR_OK) {
-
-        $uploadDir = __DIR__ . '/../uploads/cardapio/';
-
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-
-        $ext = pathinfo($_FILES['ImagemFile']['name'], PATHINFO_EXTENSION);
-        $nomeArquivo = uniqid('img_') . '.' . $ext;
-
-        $caminho = $uploadDir . $nomeArquivo;
-
-        if (move_uploaded_file($_FILES['ImagemFile']['tmp_name'], $caminho)) {
-            $imagem = '/uploads/cardapio/' . $nomeArquivo;
-        }
-    }
-
-    // INSERT
-    if (!$id) {
-
-        $sql = "
-            INSERT INTO Cardapio 
-            (Nome, TipoItem, ProdutoId, PratoId, PrecoVenda, Categoria, Imagem, Ativo)
-            VALUES 
-            (:nome, :tipoItem, :produtoId, :pratoId, :preco, :categoria, :imagem, :ativo)
-        ";
-
-        $stmt = $db->prepare($sql);
-        $stmt->execute([
-            ':nome' => $nome,
-            ':tipoItem' => $tipoItem,
-            ':produtoId' => $tipoItem === 'produto' ? $produtoId : null,
-            ':pratoId' => $tipoItem === 'prato' ? $pratoId : null,
-            ':preco' => $preco,
-            ':categoria' => $categoria,
-            ':imagem' => $imagem,
-            ':ativo' => $ativo
-        ]);
-
-        $id = $db->lastInsertId();
-
+    if ($tipoItem === 'produto') {
+        $stmt = $pdo->prepare("SELECT 1 FROM Produtos WHERE Codigo = ? AND Ativo = 1 AND TipoProduto = 'vendavel'");
+        $stmt->execute([$produtoId]);
     } else {
-        // UPDATE
+        $stmt = $pdo->prepare("SELECT 1 FROM Pratos WHERE Id = ? AND Status = 1");
+        $stmt->execute([$pratoId]);
+    }
+    if (!$stmt->fetchColumn()) {
+        throw new InvalidArgumentException('O produto ou prato vinculado não está ativo ou não foi encontrado.');
+    }
 
-        $sql = "
-            UPDATE Cardapio SET
-                Nome = :nome,
-                TipoItem = :tipoItem,
-                ProdutoId = :produtoId,
-                PratoId = :pratoId,
-                PrecoVenda = :preco,
-                Categoria = :categoria,
-                Imagem = :imagem,
-                Ativo = :ativo
-            WHERE Id = :id
-        ";
+    if ($id) {
+        $sql = "UPDATE Cardapio SET
+                    Nome = :nome,
+                    TipoItem = :tipo,
+                    ProdutoId = :produto,
+                    PratoId = :prato,
+                    PrecoVenda = :preco,
+                    Categoria = :categoria,
+                    Ativo = :ativo
+                WHERE Id = :id";
+    } else {
+        $sql = "INSERT INTO Cardapio
+                    (Nome, TipoItem, ProdutoId, PratoId, PrecoVenda, Categoria, Ativo)
+                VALUES
+                    (:nome, :tipo, :produto, :prato, :preco, :categoria, :ativo)";
+    }
 
-        $stmt = $db->prepare($sql);
-        $stmt->execute([
-            ':id' => $id,
-            ':nome' => $nome,
-            ':tipoItem' => $tipoItem,
-            ':produtoId' => $tipoItem === 'produto' ? $produtoId : null,
-            ':pratoId' => $tipoItem === 'prato' ? $pratoId : null,
-            ':preco' => $preco,
-            ':categoria' => $categoria,
-            ':imagem' => $imagem,
-            ':ativo' => $ativo
-        ]);
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        ':id' => $id,
+        ':nome' => $nome,
+        ':tipo' => $tipoItem,
+        ':produto' => $tipoItem === 'produto' ? $produtoId : null,
+        ':prato' => $tipoItem === 'prato' ? $pratoId : null,
+        ':preco' => $preco,
+        ':categoria' => $categoria !== '' ? $categoria : null,
+        ':ativo' => $ativo
+    ]);
+
+    if (!$id) {
+        $id = (int)$pdo->lastInsertId();
     }
 
     echo json_encode([
         'success' => true,
-        'message' => 'Item salvo com sucesso',
+        'message' => 'Item salvo com sucesso.',
         'id' => $id
-    ]);
-
-} catch (Exception $e) {
+    ], JSON_UNESCAPED_UNICODE);
+} catch (InvalidArgumentException $e) {
     http_response_code(400);
-
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage()
-    ]);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+} catch (Throwable $e) {
+    error_log('Erro ao salvar item do cardápio: ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Não foi possível salvar o item do cardápio.'], JSON_UNESCAPED_UNICODE);
 }
