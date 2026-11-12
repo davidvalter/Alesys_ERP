@@ -15,6 +15,7 @@ $(function () {
         const valuesBox = root.querySelector('.multi-picker-values');
         const selected = new Map();
         let options = [];
+        let loaded = false;
 
         search.placeholder = placeholder;
 
@@ -22,11 +23,10 @@ $(function () {
             const query = search.value.trim().toLocaleLowerCase('pt-BR');
             const visible = options.filter(item => item.label.toLocaleLowerCase('pt-BR').includes(query));
             optionsBox.replaceChildren();
-
             if (!visible.length) {
                 const empty = document.createElement('div');
                 empty.className = 'multi-picker-empty';
-                empty.textContent = options.length ? 'Nenhum item encontrado.' : 'Carregando opções...';
+                empty.textContent = loaded ? 'Nenhum item encontrado.' : 'Carregando opções...';
                 optionsBox.appendChild(empty);
                 return;
             }
@@ -55,7 +55,6 @@ $(function () {
         function renderSelected() {
             selectedBox.replaceChildren();
             valuesBox.replaceChildren();
-
             selected.forEach((labelText, id) => {
                 const hidden = document.createElement('input');
                 hidden.type = 'hidden';
@@ -79,12 +78,8 @@ $(function () {
                 chip.append(text, remove);
                 selectedBox.appendChild(chip);
             });
-
-            if (!selected.size && !optional) {
-                root.dataset.required = 'true';
-            } else {
-                delete root.dataset.required;
-            }
+            if (!selected.size && !optional) root.dataset.required = 'true';
+            else delete root.dataset.required;
         }
 
         search.addEventListener('focus', () => {
@@ -103,7 +98,6 @@ $(function () {
                 search.setAttribute('aria-expanded', 'false');
             }
         });
-
         document.addEventListener('click', event => {
             if (!root.contains(event.target)) {
                 menu.hidden = true;
@@ -114,6 +108,7 @@ $(function () {
         return {
             setOptions(items) {
                 options = items.map(item => ({ id: item.Codigo, label: item.Nome }));
+                loaded = true;
                 renderOptions();
             },
             getValues() {
@@ -125,23 +120,11 @@ $(function () {
         };
     }
 
-    const productPicker = picker(
-        document.querySelector('[data-picker="produto"]'),
-        'produto[]',
-        'Buscar produtos...',
-        false
-    );
-    const supplierPicker = picker(
-        document.querySelector('[data-picker="fornecedor"]'),
-        'fornecedores[]',
-        'Buscar fornecedores...',
-        true
-    );
+    const productPicker = picker(document.querySelector('[data-picker="produto"]'), 'produto[]', 'Buscar produtos...', false);
+    const supplierPicker = picker(document.querySelector('[data-picker="fornecedor"]'), 'fornecedores[]', 'Buscar fornecedores...', true);
 
     function localDate(date) {
-        return date.getFullYear() + '-' +
-            String(date.getMonth() + 1).padStart(2, '0') + '-' +
-            String(date.getDate()).padStart(2, '0');
+        return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
     }
 
     function money(value) {
@@ -285,8 +268,7 @@ $(function () {
         document.getElementById('resumoProdutos').textContent = products.size;
         document.getElementById('resumoFornecedores').textContent = suppliers.size;
         document.getElementById('resumoMenorPreco').textContent = lowest ? money(lowest.preco_medio) : '—';
-        document.getElementById('resumoMenorPrecoDetalhe').textContent =
-            lowest ? lowest.produto_nome + ' · ' + lowest.fornecedor_nome : '';
+        document.getElementById('resumoMenorPrecoDetalhe').textContent = lowest ? lowest.produto_nome + ' · ' + lowest.fornecedor_nome : '';
         document.getElementById('cardsResumo').hidden = false;
 
         const period = response.periodo || {};
@@ -329,12 +311,7 @@ $(function () {
                         : '<div class="fw-semibold">' + escapeHtml(value) + '</div><small class="text-muted">Cód. ' + escapeHtml(row.fornecedor_codigo) + '</small>'
                 },
                 { title: 'Preço médio', data: 'preco_medio', className: 'text-end fw-semibold', render: value => money(value) },
-                {
-                    title: 'Faixa de preço',
-                    data: null,
-                    className: 'text-end',
-                    render: row => money(row.preco_minimo) + ' – ' + money(row.preco_maximo)
-                },
+                { title: 'Faixa de preço', data: null, className: 'text-end', render: row => money(row.preco_minimo) + ' – ' + money(row.preco_maximo) },
                 { title: 'Notas', data: 'qtd_notas', className: 'text-center' },
                 {
                     title: 'Quantidade',
@@ -364,38 +341,66 @@ $(function () {
     function renderChart(rows) {
         if (chart) chart.destroy();
 
-        const suppliers = [...new Map(rows.map(row => [String(row.fornecedor_codigo), row.fornecedor_nome]).entries())];
-        const products = [...new Map(rows.map(row => [String(row.produto_codigo), row.produto_nome]).entries())];
-        const priceMap = new Map(rows.map(row => [
-            String(row.produto_codigo) + ':' + String(row.fornecedor_codigo),
-            Number(row.preco_medio)
-        ]));
+        const plotRows = rows
+            .map(row => ({ ...row, price: Number(row.preco_medio) }))
+            .filter(row => Number.isFinite(row.price) && row.price > 0)
+            .sort((a, b) => a.produto_nome.localeCompare(b.produto_nome, 'pt-BR') || a.price - b.price);
+
+        if (!plotRows.length) {
+            showChartState('Os registros encontrados não têm preço unitário maior que zero. Confira os preços dos itens nas notas de compra.');
+            return;
+        }
+
+        const productColor = new Map();
+        let nextColor = 0;
+        const labels = plotRows.map(row => {
+            const id = String(row.produto_codigo);
+            if (!productColor.has(id)) {
+                productColor.set(id, colors[nextColor % colors.length]);
+                nextColor++;
+            }
+            return row.produto_nome + ' · ' + row.fornecedor_nome;
+        });
 
         document.getElementById('estadoGrafico').classList.add('d-none');
         document.getElementById('containerGrafico').hidden = false;
+        document.getElementById('areaGrafico').style.height = Math.max(380, plotRows.length * 34) + 'px';
 
         chart = new Chart(document.getElementById('graficoComparacao'), {
             type: 'bar',
             data: {
-                labels: suppliers.map(item => item[1]),
-                datasets: products.map(([id, name], index) => ({
-                    label: name,
-                    data: suppliers.map(([supplierId]) => priceMap.get(id + ':' + supplierId) ?? null),
-                    backgroundColor: colors[index % colors.length],
-                    borderRadius: 4
-                }))
+                labels,
+                datasets: [{
+                    label: 'Preço médio',
+                    data: plotRows.map(row => row.price),
+                    backgroundColor: plotRows.map(row => productColor.get(String(row.produto_codigo))),
+                    borderRadius: 4,
+                    barThickness: 18
+                }]
             },
             options: {
+                indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
                 plugins: {
-                    legend: { position: 'bottom' },
-                    tooltip: { callbacks: { label: context => context.dataset.label + ': ' + money(context.raw) } }
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: items => items[0]?.label || '',
+                            label: context => 'Preço médio: ' + money(context.raw)
+                        }
+                    }
                 },
                 scales: {
-                    x: { title: { display: true, text: 'Fornecedor' } },
-                    y: { beginAtZero: true, title: { display: true, text: 'Preço médio' }, ticks: { callback: value => money(value) } }
+                    x: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Preço médio' },
+                        ticks: { callback: value => money(value) }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { autoSkip: false }
+                    }
                 }
             }
         });
