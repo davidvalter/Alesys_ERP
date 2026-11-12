@@ -4,7 +4,7 @@
 
 function abrirModalNovo() {
     document.getElementById('formProduto').reset();
-    document.getElementById('fotoPreview').src = '/images/no-image.png';
+    document.getElementById('fotoPreview').src = '/images/no-image.svg';
     document.getElementById('produtoId').value = '';
     document.querySelector('#modalExemplo .modal-title').innerText = 'Cadastrar Produto';
     carregarIngredientes();
@@ -29,7 +29,7 @@ function abrirModalEditar(id) {
                 document.getElementById("nome").value = prato.Nome;
                 document.getElementById("categoria").value = prato.Categoria;
                 document.getElementById("preco").value = prato.Preco;
-                document.getElementById("fotoPreview").src = prato.Foto || '/images/no-image.png';
+                document.getElementById("fotoPreview").src = prato.Foto || '/images/no-image.svg';
                 preencherAbaFiscal(prato);
             } else {
                 showToast("Erro ao carregar dados do prato.", "error");
