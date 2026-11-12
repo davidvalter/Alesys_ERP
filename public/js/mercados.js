@@ -9,7 +9,37 @@ if (typeof jQuery == 'undefined') {
 
 $(document).ready(function () {
     //modal
-    const modalMercado = new bootstrap.Modal(document.getElementById('modalMercado'));
+    const modalEl = document.getElementById('modalMercado');
+    const modalMercado = modalEl ? new bootstrap.Modal(modalEl) : null;
+    let fluxoFornecedorAleNFE = null;
+
+    window.abrirModalNovoFornecedor = function (dados = {}, aoSalvar = null, aoCancelar = null) {
+        if (!modalMercado) return false;
+        fluxoFornecedorAleNFE = { aoSalvar, aoCancelar };
+        $('#modalTitle').text('Novo Fornecedor');
+        $('#formMercado')[0].reset();
+        $('#mercadoCodigo').val('');
+        $('#nome').val(dados.Nome || '');
+        $('#razaoSocial').val(dados.RazaoSocial || '');
+        $('#cnpj').val(dados.CNPJ || '').trigger('input');
+        $('#inscricaoEstadual').val(dados.InscricaoEstadual || '');
+        $('#email').val(dados.Email || '');
+        $('#telefone').val(dados.Telefone || '');
+        $('#endereco').val(dados.Endereco || '');
+        $('#cep').val(dados.CEP || '').trigger('input');
+        $('#municipio').val(dados.Municipio || '');
+        $('#estado').val(dados.Estado || '');
+        modalMercado.show();
+        return true;
+    };
+
+    $('#modalMercado').on('hidden.bs.modal', function () {
+        if (fluxoFornecedorAleNFE) {
+            const fluxo = fluxoFornecedorAleNFE;
+            fluxoFornecedorAleNFE = null;
+            if (typeof fluxo.aoCancelar === 'function') fluxo.aoCancelar();
+        }
+    });
 
     // Verifica se InputMask está disponível
     if (typeof $.fn.inputmask == 'undefined') {
@@ -22,65 +52,55 @@ $(document).ready(function () {
         $('.phone-mask').inputmask('(99) [9]9999-9999');
     }
 
-    // Inicialização do DataTable
-    // Substitua a inicialização atual do DataTable por esta:
-    var table = $('#tabelaMercados').DataTable({
-        responsive: true,
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json'
-        },
-        scrollX: true,
-        autoWidth: false,
-        columnDefs: [
-            { width: "5%", targets: 0 }, // Código
-            { width: "25%", targets: 1 }, // Nome
-            { width: "20%", targets: 2 }, // CNPJ
-            { width: "15%", targets: 3 }, // Inscrição Estadual
-            { width: "20%", targets: 4 }, // Email
-            { width: "10%", targets: -1, orderable: false } // Ações
-        ],
-        initComplete: function () {
-            // Ajusta o layout após inicialização
-            this.api().columns.adjust();
-        }
-    });
-
-    // Configura o botão de exportar
-    $('#btnExportar').click(function () {
-        // Cria um link temporário para exportação
-        let csvContent = "data:text/csv;charset=utf-8,";
-
-        // Adiciona cabeçalhos
-        csvContent += table.columns().header().to$().map(function () {
-            return $(this).text();
-        }).get().join(",") + "\n";
-
-        // Adiciona dados
-        table.rows().data().each(function (row) {
-            csvContent += row.join(",") + "\n";
+    // A listagem e exportação só existem na página de mercados.
+    // O modal é compartilhado também pela importação AleNFE.
+    var table = null;
+    if ($('#tabelaMercados').length) {
+        table = $('#tabelaMercados').DataTable({
+            responsive: true,
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json'
+            },
+            scrollX: true,
+            autoWidth: false,
+            columnDefs: [
+                { width: "5%", targets: 0 },
+                { width: "25%", targets: 1 },
+                { width: "20%", targets: 2 },
+                { width: "15%", targets: 3 },
+                { width: "20%", targets: 4 },
+                { width: "10%", targets: -1, orderable: false }
+            ],
+            initComplete: function () {
+                this.api().columns.adjust();
+            }
         });
 
-        // Cria o link de download
-        var encodedUri = encodeURI(csvContent);
-        var link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "mercados_exportados.csv");
-        document.body.appendChild(link);
+        $('#btnExportar').click(function () {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += table.columns().header().to$().map(function () {
+                return $(this).text();
+            }).get().join(",") + "\n";
+            table.rows().data().each(function (row) {
+                csvContent += row.join(",") + "\n";
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "mercados_exportados.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
 
-        // Dispara o download
-        link.click();
-        document.body.removeChild(link);
-    });
+        $(window).on('resize', function () {
+            table.columns.adjust();
+        });
 
-    // Ajusta a tabela quando a janela é redimensionada
-    $(window).on('resize', function () {
-        table.columns.adjust();
-    });
-
-    // Configura o botão de exportar personalizado
-    $('#btnExportar').click(function () {
-        $('.buttons-excel').click(); // Dispara o clique no botão Excel
-    });
+        $('#btnExportar').click(function () {
+            $('.buttons-excel').click();
+        });
+    }
 
     // Máscaras para os campos
     $('.cnpj-mask').inputmask('99.999.999/9999-99');
@@ -228,8 +248,19 @@ $(document).ready(function () {
             dataType: 'json',
             success: function (response) {
                 if (response.success) {
-                    modalMercado.hide();
-                    location.reload();
+                    if (fluxoFornecedorAleNFE) {
+                        const fluxo = fluxoFornecedorAleNFE;
+                        fluxoFornecedorAleNFE = null;
+                        $('#modalMercado').one('hidden.bs.modal', function () {
+                            if (typeof fluxo.aoSalvar === 'function') {
+                                fluxo.aoSalvar({ ...formData, Codigo: response.Codigo });
+                            }
+                        });
+                        modalMercado.hide();
+                    } else {
+                        modalMercado.hide();
+                        location.reload();
+                    }
                 } else {
                     showAlert('Erro: ' + response.message, 'error', 5000);
                     $submitBtn.prop('disabled', false).html('<i class="fas fa-save"></i> Salvar');
