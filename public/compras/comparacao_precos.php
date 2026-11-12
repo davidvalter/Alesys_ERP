@@ -13,11 +13,12 @@ $extraCss = '
 .multi-picker-option:hover { background: #f1f8f4; }
 .multi-picker-option input { margin-top: .25rem; accent-color: #198754; }
 .multi-picker-empty { color: #6c757d; padding: .7rem; }
-.multi-picker-selected { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .4rem; }
+.multi-picker-selected { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .4rem; max-height: 88px; overflow-y: auto; align-content: flex-start; }
 .multi-picker-chip { display: inline-flex; align-items: center; gap: .35rem; max-width: 100%; padding: .2rem .5rem; border-radius: 999px; background: #e8f3ec; color: #17643a; font-size: .8rem; }
 .multi-picker-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .multi-picker-chip button { border: 0; padding: 0; background: transparent; color: inherit; line-height: 1; }
 .multi-picker-values { display: none; }
+#containerGrafico { max-height: 640px; overflow-y: auto; }
 </style>
 ';
 
@@ -73,8 +74,8 @@ require_once __DIR__ . '/../templates/base_protected_v2.php';
     <section class="card border-0 shadow-sm">
         <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <h6 class="mb-0">Comparativo visual por fornecedor</h6>
-                <small class="text-muted">Cada série representa um produto; os valores mostram o preço médio.</small>
+                <h6 class="mb-0">Preços médios por produto e fornecedor</h6>
+                <small class="text-muted">Cada barra representa o preço médio daquele produto em um fornecedor.</small>
             </div>
         </div>
         <div class="card-body">
@@ -82,14 +83,15 @@ require_once __DIR__ . '/../templates/base_protected_v2.php';
                 <i class="fas fa-chart-column fs-3 d-block mb-2"></i>
                 Gere uma comparação para visualizar os preços.
             </div>
-            <div id="containerGrafico" style="height: 380px;" hidden>
-                <canvas id="graficoComparacao" aria-label="Comparativo de preços por fornecedor" role="img"></canvas>
+            <div id="containerGrafico" hidden>
+                <div id="areaGrafico" style="height: 380px;">
+                    <canvas id="graficoComparacao" aria-label="Preços médios por produto e fornecedor" role="img"></canvas>
+                </div>
             </div>
         </div>
     </section>
 </div>
 
-<!-- Os scripts da página precisam vir antes do footer, que encerra o HTML. -->
 <script src="/js/libs/chart.js"></script>
 <script src="/js/comparacao_precos.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/js/comparacao_precos.js') ?>"></script>
 
