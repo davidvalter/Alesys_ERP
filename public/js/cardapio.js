@@ -15,7 +15,7 @@ function bindEventos() {
     document.getElementById('btnNovo')?.addEventListener('click', async event => {
         event.preventDefault();
         try {
-            await abrirModal();
+            await abrirFormularioCardapio();
         } catch (error) {
             console.error('Erro ao abrir o modal do cardápio:', error);
             showToast(error.message || 'Não foi possível abrir o formulário.', 'danger');
@@ -75,7 +75,7 @@ function carregarTabela() {
     });
 }
 
-async function abrirModal(dados = null) {
+async function abrirFormularioCardapio(dados = null) {
     const form = document.getElementById('formCardapio');
     const tipo = dados?.TipoItem || '';
     form.reset();
@@ -209,7 +209,7 @@ async function salvar() {
 function editar(id) {
     const item = tabela?.rows().data().toArray().find(row => Number(row.Id) === Number(id));
     if (!item) return;
-    abrirModal(item).catch(error => {
+    abrirFormularioCardapio(item).catch(error => {
         console.error('Erro ao abrir a edição do item do cardápio:', error);
         showToast(error.message || 'Não foi possível abrir o formulário.', 'danger');
     });
