@@ -1,5 +1,6 @@
 (function ($, window, document) {
     "use strict";
+    const IMAGE_PLACEHOLDER = '/images/no-image.svg';
     const MODULE_SELECTOR = {
         form: '#formProduto',
         table: '#tabelaProdutos',
