@@ -5,74 +5,23 @@ document.addEventListener('DOMContentLoaded', () => {
     bindEventos();
 });
 
-// =============================
-// EVENTOS
-// =============================
 function bindEventos() {
+    document.getElementById('btnNovo')?.addEventListener('click', () => abrirModal());
 
-    document.getElementById('btnNovo')?.addEventListener('click', abrirModal);
-
-    document.getElementById('TipoItem')?.addEventListener('change', (e) => {
-        toggleTipo(e.target.value);
+    document.getElementById('TipoItem')?.addEventListener('change', event => {
+        toggleTipo(event.target.value);
         atualizarPreviewImagem();
     });
-    document.getElementById('ProdutoId')?.addEventListener('change', atualizarPreviewImagem);
-    document.getElementById('PratoId')?.addEventListener('change', atualizarPreviewImagem);
+    document.getElementById('ProdutoId')?.addEventListener('change', () => atualizarPreviewImagem());
+    document.getElementById('PratoId')?.addEventListener('change', () => atualizarPreviewImagem());
 
-    document.getElementById('formCardapio')?.addEventListener('submit', (e) => {
-        e.preventDefault(); // 🚨 IMPEDE reload da página
+    document.getElementById('formCardapio')?.addEventListener('submit', event => {
+        event.preventDefault();
         salvar();
     });
-
-bela;
-
-document.addEventListener('DOMContentLoaded', () => {
-    carregarTabela();
-    bindEventos();
-});
-
-// =============================
-// EVENTOS
-// =============================
-function bindEventos() {
-
-    document.getElementById('btnNovo')?.addEventListener('click', abrirModal);
-
-    document.getElementById('TipoItem')?.addEventListener('change', (e) => {
-        toggleTipo(e.target.value);
-        atualizarPreviewImagem();
-    });
-    document.getElementById('ProdutoId')?.addEventListener('change', atualizarPreviewImagem);
-    document.getElementById('PratoId')?.addEventListener('change', atualizarPreviewImagem);
-
-    document.getElementById('formCardapio')?.addEventListener('submit', (e) => {
-        e.preventDefault(); // 🚨 IMPEDE reload da página
-        salvar();
-    });
-
-    document.getElementById('ImagemFile')?.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-
-        if (!file) return;
-
-        const reader = new FileReader();
-
-        reader.onload = (ev) => {
-            const img = document.getElementById('previewImagem');
-            img.src = ev.target.result;
-            img.style.display = 'block';
-        };
-
-        reader.readAsDataURL(file);
-    });
-
 }
 
-// =============================
-// DATATABLE
-// =============================
 function carregarTabela() {
-
     tabela = $('#tabelaCardapio').DataTable({
         ajax: {
             url: '/api/list_cardapio.php',
@@ -82,62 +31,59 @@ function carregarTabela() {
             { data: 'Id' },
             { data: 'Nome' },
             { data: 'TipoItem' },
-            { data: 'Categoria' },
+            { data: 'Categoria', defaultContent: '' },
             {
                 data: 'PrecoVenda',
-                render: d => 'R$ ' + parseFloat(d).toFixed(2)
+                render: valor => 'R$ ' + Number(valor || 0).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                })
             },
             {
                 data: 'Ativo',
-                render: d => d == 1 ? 'Ativo' : 'Inativo'
+                render: valor => Number(valor) === 1 ? 'Ativo' : 'Inativo'
             },
             {
                 data: null,
-                render: (d) => `
-                    <button class="btn btn-sm btn-success" onclick="editar(${d.Id})">
+                orderable: false,
+                searchable: false,
+                render: item => `
+                    <button class="btn btn-sm btn-success" type="button" onclick="editar(${Number(item.Id)})" title="Editar">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="remover(${d.Id})">
+                    <button class="btn btn-sm btn-danger" type="button" onclick="remover(${Number(item.Id)})" title="Remover">
                         <i class="fas fa-trash"></i>
                     </button>
                 `
             }
-        ]
+        ],
+        language: { url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json' }
     });
 }
 
-// =============================
-// MODAL
-// =============================
 async function abrirModal(dados = null) {
+    await Promise.all([carregarProdutos(), carregarPratos()]);
 
-    // Carrega os vínculos ativos antes de abrir.
-    await carregarProdutos();
-    await carregarPratos();
-
-    document.getElementById('formCardapio').reset();
+    const form = document.getElementById('formCardapio');
+    form.reset();
     document.getElementById('Id').value = dados?.Id || '';
     document.getElementById('Nome').value = dados?.Nome || '';
     document.getElementById('TipoItem').value = dados?.TipoItem || '';
     document.getElementById('Categoria').value = dados?.Categoria || '';
-    document.getElementById('PrecoVenda').value = dados?.PrecoVenda || '';
+    document.getElementById('PrecoVenda').value = dados?.PrecoVenda ?? '';
     document.getElementById('Ativo').value = dados?.Ativo ?? 1;
 
-    // 🔹 Preenche selects no modo edição
     if (dados) {
-        document.getElementById('ProdutoId').value = dados?.ProdutoId || '';
-        document.getElementById('PratoId').value = dados?.PratoId || '';
+        document.getElementById('ProdutoId').value = dados.ProdutoId || '';
+        document.getElementById('PratoId').value = dados.PratoId || '';
     }
 
-    toggleTipo(dados?.TipoItem);
+    toggleTipo(dados?.TipoItem || '');
     atualizarPreviewImagem(dados?.Imagem || '');
-    $('#modalTitle').text(dados ? 'Editar Item' : 'Novo Item');
-    $('#modalCardapio').modal('show');
+    document.getElementById('modalTitle').textContent = dados ? 'Editar Item' : 'Novo Item';
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modalCardapio')).show();
 }
 
-// =============================
-// TOGGLE TIPO
-// =============================
 function toggleTipo(tipo) {
     document.getElementById('boxProduto').style.display = tipo === 'produto' ? 'block' : 'none';
     document.getElementById('boxPrato').style.display = tipo === 'prato' ? 'block' : 'none';
@@ -145,68 +91,54 @@ function toggleTipo(tipo) {
 
 function atualizarPreviewImagem(fallback = '') {
     const tipo = document.getElementById('TipoItem').value;
-    const selectId = tipo === 'produto' ? 'ProdutoId' : (tipo === 'prato' ? 'PratoId' : null);
-    const select = selectId ? document.getElementById(selectId) : null;
-    const optionImagem = select?.selectedOptions?.[0]?.dataset?.imagem || '';
-    const imagem = fallback || optionImagem || '/images/no-image.png';
-    document.getElementById('previewImagem').src = imagem;
+    const idSelect = tipo === 'produto' ? 'ProdutoId' : (tipo === 'prato' ? 'PratoId' : null);
+    const imagemAssociada = idSelect
+        ? (document.getElementById(idSelect).selectedOptions[0]?.dataset.imagem || '')
+        : '';
+    const preview = document.getElementById('previewImagem');
+    preview.src = fallback || imagemAssociada || '/images/no-image.png';
 }
 
-// =============================
-// CARREGAR PRODUTOS
-// =============================
 async function carregarProdutos() {
+    const select = document.getElementById('ProdutoId');
+    select.replaceChildren(new Option('Selecione', ''));
     try {
-        const res = await fetch('/api/list_produtos.php');
-        const json = await res.json();
-
-        const select = document.getElementById('ProdutoId');
-        select.innerHTML = '<option value="">Selecione</option>';
-
-        if (json.success && json.data) {
-            json.data.forEach(p => {
-                const option = new Option(p.Nome, p.Codigo);
-                option.dataset.imagem = p.Imagem || '';
-                select.add(option);
-            });
-        }
-
-    } catch (err) {
-        console.error('Erro ao carregar produtos', err);
+        const response = await fetch('/api/list_produtos.php', { cache: 'no-store' });
+        const json = await response.json();
+        if (!response.ok || !json.success) throw new Error(json.message || 'Erro ao carregar produtos.');
+        (json.data || []).forEach(produto => {
+            const option = new Option(produto.Nome, produto.Codigo);
+            option.dataset.imagem = produto.Imagem || '';
+            select.add(option);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar produtos do cardápio:', error);
+        showToast(error.message || 'Erro ao carregar produtos.', 'danger');
     }
 }
 
-// =============================
-// CARREGAR PRATOS
-// =============================
 async function carregarPratos() {
+    const select = document.getElementById('PratoId');
+    select.replaceChildren(new Option('Selecione', ''));
     try {
-        const res = await fetch('/api/list_pratos.php');
-        const json = await res.json();
-
-        const select = document.getElementById('PratoId');
-        select.innerHTML = '<option value="">Selecione</option>';
-
-        if (json.success && json.data) {
-            json.data.forEach(p => {
-                const option = new Option(p.Nome, p.Id);
-                option.dataset.imagem = p.Imagem || '';
-                select.add(option);
-            });
-        }
-
-    } catch (err) {
-        console.error('Erro ao carregar pratos', err);
+        const response = await fetch('/api/list_pratos.php', { cache: 'no-store' });
+        const json = await response.json();
+        if (!response.ok || !json.success) throw new Error(json.message || 'Erro ao carregar pratos.');
+        (json.data || []).forEach(prato => {
+            const option = new Option(prato.Nome, prato.Id);
+            option.dataset.imagem = prato.Imagem || '';
+            select.add(option);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar pratos do cardápio:', error);
+        showToast(error.message || 'Erro ao carregar pratos.', 'danger');
     }
 }
 
-// =============================
-// SALVAR
-// =============================
 async function salvar() {
-
+    const form = document.getElementById('formCardapio');
+    const submit = document.querySelector('button[form="formCardapio"][type="submit"]');
     const formData = new FormData();
-
     formData.append('Id', document.getElementById('Id').value || '');
     formData.append('Nome', document.getElementById('Nome').value);
     formData.append('TipoItem', document.getElementById('TipoItem').value);
@@ -216,89 +148,58 @@ async function salvar() {
     formData.append('PrecoVenda', document.getElementById('PrecoVenda').value);
     formData.append('Ativo', document.getElementById('Ativo').value);
 
+    if (submit) {
+        submit.disabled = true;
+        submit.dataset.labelOriginal = submit.innerHTML;
+        submit.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Salvando';
+    }
+
     try {
+        const response = await fetch('/api/save_cardapio.php', { method: 'POST', body: formData });
+        const json = await response.json();
+        if (!response.ok || !json.success) throw new Error(json.message || 'Erro ao salvar o item.');
 
-        const res = await fetch('/api/save_cardapio.php', {
-            method: 'POST',
-            body: formData
-        });
-
-        const json = await res.json();
-
-        if (!res.ok) {
-            throw new Error(json.message || 'Erro ao salvar');
-        }
-
-        showToast(json.message || 'Salvo com sucesso', 'success');
-
-        $('#modalCardapio').modal('hide');
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalCardapio')).hide();
+        showToast(json.message || 'Item salvo com sucesso.', 'success');
         tabela.ajax.reload(null, false);
-
-    } catch (err) {
-        console.error(err);
-        showToast(err.message || 'Erro ao salvar', 'danger');
+    } catch (error) {
+        console.error(error);
+        showToast(error.message || 'Erro ao salvar.', 'danger');
+    } finally {
+        if (submit) {
+            submit.disabled = false;
+            submit.innerHTML = submit.dataset.labelOriginal || '<i class="fas fa-save me-1"></i>Salvar';
+        }
     }
 }
 
-// =============================
-// EDITAR
-// =============================
 function editar(id) {
-    const data = tabela.rows().data().toArray().find(x => x.Id == id);
-    abrirModal(data);
+    const item = tabela.rows().data().toArray().find(row => Number(row.Id) === Number(id));
+    if (item) abrirModal(item);
 }
 
-// =============================
-// REMOVER
-// =============================
 async function remover(id) {
-
     if (!confirm('Deseja remover este item?')) return;
-
     try {
-
-        const res = await fetch('/api/delete_cardapio.php', {
+        const response = await fetch('/api/delete_cardapio.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ Id: id })
         });
-
-        const json = await res.json();
-
-        if (!res.ok) {
-            throw new Error(json.message);
-        }
-
-        if (json.success) {
-            showToast('Item removido com sucesso', 'success');
-            tabela.ajax.reload(null, false);
-        } else {
-            showToast(json.message, 'danger');
-        }
-
-    } catch (err) {
-        console.error(err);
-        showToast('Erro ao remover', 'danger');
+        const json = await response.json();
+        if (!response.ok || !json.success) throw new Error(json.message || 'Erro ao remover.');
+        showToast('Item removido com sucesso.', 'success');
+        tabela.ajax.reload(null, false);
+    } catch (error) {
+        console.error(error);
+        showToast(error.message || 'Erro ao remover.', 'danger');
     }
 }
 
-// =============================
-// AVISOS
-// =============================
 function showToast(mensagem, tipo = 'primary') {
-
     const toastEl = document.getElementById('toastGlobal');
     const toastMsg = document.getElementById('toastMensagem');
-
     toastEl.className = `toast align-items-center text-bg-${tipo} border-0`;
-    toastMsg.innerText = mensagem;
-
-    const toast = new bootstrap.Toast(toastEl, {
-        delay: 3000,      // ⏱️ 3 segundos
-        autohide: true
-    });
-
-    toast.show();
+    toastMsg.textContent = mensagem;
+    bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000, autohide: true }).show();
 }
