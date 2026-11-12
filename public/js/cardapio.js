@@ -18,7 +18,7 @@ function bindEventos() {
             await abrirFormularioCardapio();
         } catch (error) {
             console.error('Erro ao abrir o modal do cardápio:', error);
-            showToast(error.message || 'Não foi possível abrir o formulário.', 'danger');
+            showToastCardapio(error.message || 'Não foi possível abrir o formulário.', 'danger');
         }
     });
 
@@ -146,7 +146,7 @@ async function carregarProdutos() {
         });
     } catch (error) {
         console.error('Erro ao carregar produtos do cardápio:', error);
-        showToast(error.message || 'Erro ao carregar produtos.', 'danger');
+        showToastCardapio(error.message || 'Erro ao carregar produtos.', 'danger');
     }
 }
 
@@ -164,7 +164,7 @@ async function carregarPratos() {
         });
     } catch (error) {
         console.error('Erro ao carregar pratos do cardápio:', error);
-        showToast(error.message || 'Erro ao carregar pratos.', 'danger');
+        showToastCardapio(error.message || 'Erro ao carregar pratos.', 'danger');
     }
 }
 
@@ -193,11 +193,11 @@ async function salvar() {
         if (!response.ok || !json.success) throw new Error(json.message || 'Erro ao salvar o item.');
 
         obterModalCardapio().hide();
-        showToast(json.message || 'Item salvo com sucesso.', 'success');
+        showToastCardapio(json.message || 'Item salvo com sucesso.', 'success');
         tabela.ajax.reload(null, false);
     } catch (error) {
         console.error(error);
-        showToast(error.message || 'Erro ao salvar.', 'danger');
+        showToastCardapio(error.message || 'Erro ao salvar.', 'danger');
     } finally {
         if (submit) {
             submit.disabled = false;
@@ -211,7 +211,7 @@ function editar(id) {
     if (!item) return;
     abrirFormularioCardapio(item).catch(error => {
         console.error('Erro ao abrir a edição do item do cardápio:', error);
-        showToast(error.message || 'Não foi possível abrir o formulário.', 'danger');
+        showToastCardapio(error.message || 'Não foi possível abrir o formulário.', 'danger');
     });
 }
 
@@ -225,15 +225,15 @@ async function remover(id) {
         });
         const json = await response.json();
         if (!response.ok || !json.success) throw new Error(json.message || 'Erro ao remover.');
-        showToast('Item removido com sucesso.', 'success');
+        showToastCardapio('Item removido com sucesso.', 'success');
         tabela.ajax.reload(null, false);
     } catch (error) {
         console.error(error);
-        showToast(error.message || 'Erro ao remover.', 'danger');
+        showToastCardapio(error.message || 'Erro ao remover.', 'danger');
     }
 }
 
-function showToast(mensagem, tipo = 'primary') {
+function showToastCardapio(mensagem, tipo = 'primary') {
     const toastEl = document.getElementById('toastGlobal');
     const toastMsg = document.getElementById('toastMensagem');
     toastEl.className = `toast align-items-center text-bg-${tipo} border-0`;
