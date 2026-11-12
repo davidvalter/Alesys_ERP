@@ -4,6 +4,7 @@
 
 function abrirModalNovo() {
     document.getElementById('formProduto').reset();
+    document.getElementById('fotoPreview').src = '/images/no-image.png';
     document.getElementById('produtoId').value = '';
     document.querySelector('#modalExemplo .modal-title').innerText = 'Cadastrar Produto';
     carregarIngredientes();
@@ -28,6 +29,7 @@ function abrirModalEditar(id) {
                 document.getElementById("nome").value = prato.Nome;
                 document.getElementById("categoria").value = prato.Categoria;
                 document.getElementById("preco").value = prato.Preco;
+                document.getElementById("fotoPreview").src = prato.Foto || '/images/no-image.png';
                 preencherAbaFiscal(prato);
             } else {
                 showToast("Erro ao carregar dados do prato.", "error");
@@ -152,6 +154,14 @@ function showToast(message, type = "success") {
 }
 
 /* ==================== SALVAR PRATO ==================== */
+
+document.getElementById('foto').addEventListener('change', function () {
+    const file = this.files && this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = event => document.getElementById('fotoPreview').src = event.target.result;
+    reader.readAsDataURL(file);
+});
 
 document.getElementById('formProduto').addEventListener('submit', function (e) {
     e.preventDefault();
