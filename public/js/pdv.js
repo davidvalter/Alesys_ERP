@@ -117,18 +117,20 @@ const PDV = {
 
         produtos.forEach(p => {
 
-            const img = p.Imagem || '/images/no-image.png';
+            const img = this.escapeHtml(p.Imagem || '/images/no-image.png');
+            const nome = this.escapeHtml(p.Nome);
 
             grid.innerHTML += `
                 <div class="col-xl-2 col-lg-3 col-md-4 col-6">
                     <div class="card produto-card h-100 cursor-pointer" onclick="PDV.addProduto(${p.Id})">
 
                         <div class="produto-img-wrapper">
-                            <img src="${img}" class="produto-img">
+                            <img src="${img}" class="produto-img" alt="${nome}" width="160" height="100" loading="lazy" decoding="async"
+                                onerror="this.onerror=null;this.src='/images/no-image.png'">
                         </div>
 
                         <div class="card-body text-center">
-                            <div class="produto-nome">${p.Nome}</div>
+                            <div class="produto-nome">${nome}</div>
                             <div class="produto-preco">
                                 R$ ${parseFloat(p.PrecoVenda).toFixed(2)}
                             </div>
@@ -138,6 +140,12 @@ const PDV = {
                 </div>
             `;
         });
+    },
+
+    escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[character]);
     },
 
     // =============================
