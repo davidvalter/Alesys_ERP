@@ -14,7 +14,36 @@ function bindEventos() {
 
     document.getElementById('TipoItem')?.addEventListener('change', (e) => {
         toggleTipo(e.target.value);
+        atualizarPreviewImagem();
     });
+    document.getElementById('ProdutoId')?.addEventListener('change', atualizarPreviewImagem);
+    document.getElementById('PratoId')?.addEventListener('change', atualizarPreviewImagem);
+
+    document.getElementById('formCardapio')?.addEventListener('submit', (e) => {
+        e.preventDefault(); // 🚨 IMPEDE reload da página
+        salvar();
+    });
+
+bela;
+
+document.addEventListener('DOMContentLoaded', () => {
+    carregarTabela();
+    bindEventos();
+});
+
+// =============================
+// EVENTOS
+// =============================
+function bindEventos() {
+
+    document.getElementById('btnNovo')?.addEventListener('click', abrirModal);
+
+    document.getElementById('TipoItem')?.addEventListener('change', (e) => {
+        toggleTipo(e.target.value);
+        atualizarPreviewImagem();
+    });
+    document.getElementById('ProdutoId')?.addEventListener('change', atualizarPreviewImagem);
+    document.getElementById('PratoId')?.addEventListener('change', atualizarPreviewImagem);
 
     document.getElementById('formCardapio')?.addEventListener('submit', (e) => {
         e.preventDefault(); // 🚨 IMPEDE reload da página
@@ -82,12 +111,11 @@ function carregarTabela() {
 // =============================
 async function abrirModal(dados = null) {
 
-    // 🔹 Carrega selects antes de abrir
+    // Carrega os vínculos ativos antes de abrir.
     await carregarProdutos();
     await carregarPratos();
 
-    $('#modalCardapio').modal('show');
-
+    document.getElementById('formCardapio').reset();
     document.getElementById('Id').value = dados?.Id || '';
     document.getElementById('Nome').value = dados?.Nome || '';
     document.getElementById('TipoItem').value = dados?.TipoItem || '';
@@ -102,6 +130,9 @@ async function abrirModal(dados = null) {
     }
 
     toggleTipo(dados?.TipoItem);
+    atualizarPreviewImagem(dados?.Imagem || '');
+    $('#modalTitle').text(dados ? 'Editar Item' : 'Novo Item');
+    $('#modalCardapio').modal('show');
 }
 
 // =============================
@@ -110,6 +141,15 @@ async function abrirModal(dados = null) {
 function toggleTipo(tipo) {
     document.getElementById('boxProduto').style.display = tipo === 'produto' ? 'block' : 'none';
     document.getElementById('boxPrato').style.display = tipo === 'prato' ? 'block' : 'none';
+}
+
+function atualizarPreviewImagem(fallback = '') {
+    const tipo = document.getElementById('TipoItem').value;
+    const selectId = tipo === 'produto' ? 'ProdutoId' : (tipo === 'prato' ? 'PratoId' : null);
+    const select = selectId ? document.getElementById(selectId) : null;
+    const optionImagem = select?.selectedOptions?.[0]?.dataset?.imagem || '';
+    const imagem = fallback || optionImagem || '/images/no-image.png';
+    document.getElementById('previewImagem').src = imagem;
 }
 
 // =============================
@@ -125,7 +165,9 @@ async function carregarProdutos() {
 
         if (json.success && json.data) {
             json.data.forEach(p => {
-                select.innerHTML += `<option value="${p.Codigo}">${p.Nome}</option>`;
+                const option = new Option(p.Nome, p.Codigo);
+                option.dataset.imagem = p.Imagem || '';
+                select.add(option);
             });
         }
 
@@ -147,7 +189,9 @@ async function carregarPratos() {
 
         if (json.success && json.data) {
             json.data.forEach(p => {
-                select.innerHTML += `<option value="${p.Id}">${p.Nome}</option>`;
+                const option = new Option(p.Nome, p.Id);
+                option.dataset.imagem = p.Imagem || '';
+                select.add(option);
             });
         }
 
@@ -171,11 +215,6 @@ async function salvar() {
     formData.append('Categoria', document.getElementById('Categoria').value);
     formData.append('PrecoVenda', document.getElementById('PrecoVenda').value);
     formData.append('Ativo', document.getElementById('Ativo').value);
-
-    const file = document.getElementById('ImagemFile').files[0];
-    if (file) {
-        formData.append('ImagemFile', file);
-    }
 
     try {
 
