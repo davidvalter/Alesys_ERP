@@ -1,5 +1,7 @@
 <?php
 // CLI migration: creates server-side thumbnails and links existing image files.
+// For legacy images above 40 MP (up to 70 MP), use a higher CLI memory limit
+// after checking available server RAM, e.g. php -d memory_limit=512M database/migrar_miniaturas.php.
 if (PHP_SAPI !== 'cli') {
     http_response_code(404);
     exit;
