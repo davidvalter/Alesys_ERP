@@ -1,15 +1,14 @@
 <?php
 // public/api/get_produto.php
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../configs/database.php';
 
 try {
-    $pdo = getDB();
-
     if (!isset($_GET['Codigo'])) {
-        throw new Exception('Código do produto não fornecido');
+        throw new InvalidArgumentException('Código do produto não fornecido.');
     }
 
+    $pdo = getDB();
     $stmt = $pdo->prepare("
         SELECT
             p.Codigo,
@@ -26,28 +25,27 @@ try {
             p.CSOSN,
             p.CEST,
             p.Ativo,
+            m.CaminhoMiniatura AS Imagem,
             n.Descricao AS NCM_Descricao,
             c.Descricao AS CEST_Descricao
         FROM Produtos p
+        LEFT JOIN Midias m ON m.Id = p.ImagemId
         LEFT JOIN ProdutosNCM n ON n.Codigo = p.NCM
         LEFT JOIN ProdutosCEST c ON c.Codigo = p.CEST
-        WHERE p.Codigo = ? AND p.Ativo = 1
+        WHERE p.Codigo = ?
     ");
-    $stmt->execute([$_GET['Codigo']]);
-
+    $stmt->execute([(int)$_GET['Codigo']]);
     $produto = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$produto) {
-        throw new Exception('Produto não encontrado');
+        throw new RuntimeException('Produto não encontrado.');
     }
 
-    echo json_encode($produto);
-
-} catch (Exception $e) {
-    http_response_code(400);
+    echo json_encode($produto, JSON_UNESCAPED_UNICODE);
+} catch (Throwable $e) {
+    http_response_code($e instanceof InvalidArgumentException ? 400 : 500);
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
 }
-?>
