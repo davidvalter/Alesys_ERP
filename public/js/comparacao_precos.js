@@ -1,237 +1,343 @@
 /* /public/js/comparacao_precos.js */
 $(function () {
-    const $produto = $('#produto');
-    const $fornecedores = $('#fornecedores');
-    const $form = $('#formFiltros');
-    const $botaoGerar = $('#btnGerarComparacao');
-    let tabela = null;
-    let grafico = null;
-    let resultadosAtuais = [];
+    const form = document.getElementById('formFiltros');
+    const button = document.getElementById('btnGerarComparacao');
+    let chart = null;
+    let table = null;
+    let currentRows = [];
+    const colors = ['#198754', '#0d6efd', '#fd7e14', '#6f42c1', '#0dcaf0', '#d63384', '#6c757d', '#20c997'];
 
-    const cores = ['#198754', '#0d6efd', '#fd7e14', '#6f42c1', '#0dcaf0', '#d63384', '#6c757d', '#20c997'];
+    function picker(root, inputName, placeholder, optional) {
+        const search = root.querySelector('.multi-picker-search');
+        const menu = root.querySelector('.multi-picker-menu');
+        const optionsBox = root.querySelector('.multi-picker-options');
+        const selectedBox = root.querySelector('.multi-picker-selected');
+        const valuesBox = root.querySelector('.multi-picker-values');
+        const selected = new Map();
+        let options = [];
 
-    function escapeHtml(value) {
-        return String(value ?? '').replace(/[&<>"']/g, char => ({
-            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-        })[char]);
+        search.placeholder = placeholder;
+
+        function renderOptions() {
+            const query = search.value.trim().toLocaleLowerCase('pt-BR');
+            const visible = options.filter(item => item.label.toLocaleLowerCase('pt-BR').includes(query));
+            optionsBox.replaceChildren();
+
+            if (!visible.length) {
+                const empty = document.createElement('div');
+                empty.className = 'multi-picker-empty';
+                empty.textContent = options.length ? 'Nenhum item encontrado.' : 'Carregando opções...';
+                optionsBox.appendChild(empty);
+                return;
+            }
+
+            visible.forEach(item => {
+                const label = document.createElement('label');
+                label.className = 'multi-picker-option';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = selected.has(String(item.id));
+                checkbox.addEventListener('change', () => {
+                    const key = String(item.id);
+                    if (checkbox.checked) selected.set(key, item.label);
+                    else selected.delete(key);
+                    renderSelected();
+                    renderOptions();
+                    search.focus();
+                });
+                const text = document.createElement('span');
+                text.textContent = item.label;
+                label.append(checkbox, text);
+                optionsBox.appendChild(label);
+            });
+        }
+
+        function renderSelected() {
+            selectedBox.replaceChildren();
+            valuesBox.replaceChildren();
+
+            selected.forEach((labelText, id) => {
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = inputName;
+                hidden.value = id;
+                valuesBox.appendChild(hidden);
+
+                const chip = document.createElement('span');
+                chip.className = 'multi-picker-chip';
+                const text = document.createElement('span');
+                text.textContent = labelText;
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.setAttribute('aria-label', 'Remover ' + labelText);
+                remove.innerHTML = '&times;';
+                remove.addEventListener('click', () => {
+                    selected.delete(id);
+                    renderSelected();
+                    renderOptions();
+                });
+                chip.append(text, remove);
+                selectedBox.appendChild(chip);
+            });
+
+            if (!selected.size && !optional) {
+                root.dataset.required = 'true';
+            } else {
+                delete root.dataset.required;
+            }
+        }
+
+        search.addEventListener('focus', () => {
+            menu.hidden = false;
+            search.setAttribute('aria-expanded', 'true');
+            renderOptions();
+        });
+        search.addEventListener('input', () => {
+            menu.hidden = false;
+            search.setAttribute('aria-expanded', 'true');
+            renderOptions();
+        });
+        search.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                menu.hidden = true;
+                search.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.addEventListener('click', event => {
+            if (!root.contains(event.target)) {
+                menu.hidden = true;
+                search.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        return {
+            setOptions(items) {
+                options = items.map(item => ({ id: item.Codigo, label: item.Nome }));
+                renderOptions();
+            },
+            getValues() {
+                return [...selected.keys()];
+            },
+            focus() {
+                search.focus();
+            }
+        };
     }
 
-    function dinheiro(value) {
+    const productPicker = picker(
+        document.querySelector('[data-picker="produto"]'),
+        'produto[]',
+        'Buscar produtos...',
+        false
+    );
+    const supplierPicker = picker(
+        document.querySelector('[data-picker="fornecedor"]'),
+        'fornecedores[]',
+        'Buscar fornecedores...',
+        true
+    );
+
+    function localDate(date) {
+        return date.getFullYear() + '-' +
+            String(date.getMonth() + 1).padStart(2, '0') + '-' +
+            String(date.getDate()).padStart(2, '0');
+    }
+
+    function money(value) {
         return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value) || 0);
     }
 
-    function dataLocal(date) {
-        const ano = date.getFullYear();
-        const mes = String(date.getMonth() + 1).padStart(2, '0');
-        const dia = String(date.getDate()).padStart(2, '0');
-        return ano + '-' + mes + '-' + dia;
+    function showError(message) {
+        const error = document.getElementById('erroFiltros');
+        error.textContent = message;
+        error.classList.remove('d-none');
     }
 
-    function mostrarErro(mensagem) {
-        $('#erroFiltros').text(mensagem).removeClass('d-none');
+    function clearError() {
+        const error = document.getElementById('erroFiltros');
+        error.textContent = '';
+        error.classList.add('d-none');
     }
 
-    function limparErro() {
-        $('#erroFiltros').addClass('d-none').text('');
+    function showResultsState(message) {
+        document.getElementById('containerTabela').hidden = true;
+        const state = document.getElementById('estadoResultados');
+        state.textContent = message;
+        state.classList.remove('d-none');
+        document.getElementById('cardsResumo').hidden = true;
+        document.getElementById('btnExportar').disabled = true;
     }
 
-    function mostrarEstadoResultados(mensagem) {
-        $('#containerTabela').prop('hidden', true);
-        $('#estadoResultados').html('<i class="fas fa-circle-info fs-3 d-block mb-2"></i>').append(document.createTextNode(mensagem)).removeClass('d-none');
-        $('#cardsResumo').prop('hidden', true);
-        $('#btnExportar').prop('disabled', true);
+    function showChartState(message) {
+        if (chart) {
+            chart.destroy();
+            chart = null;
+        }
+        document.getElementById('containerGrafico').hidden = true;
+        const state = document.getElementById('estadoGrafico');
+        state.textContent = message;
+        state.classList.remove('d-none');
     }
 
-    function carregarFiltros() {
+    function loadFilterOptions() {
         $.getJSON('/api/get_produtos_comparacao.php')
             .done(response => {
                 if (!response.success) {
-                    mostrarErro(response.message || 'Não foi possível carregar os produtos.');
+                    showError(response.message || 'Não foi possível carregar os produtos.');
                     return;
                 }
-                $produto.empty();
-                (response.data || []).forEach(item => {
-                    $produto.append(new Option(item.Nome, item.Codigo));
-                });
-                $produto.select2({
-                    placeholder: 'Selecione um ou mais produtos',
-                    width: '100%',
-                    closeOnSelect: false
-                });
-                if ((response.data || []).length === 0) {
-                    mostrarErro('Não há produtos ativos disponíveis para comparação.');
-                }
+                productPicker.setOptions(response.data || []);
+                if (!response.data?.length) showError('Não há produtos ativos disponíveis para comparação.');
             })
-            .fail(() => mostrarErro('Erro ao carregar a lista de produtos.'));
+            .fail(() => showError('Erro ao carregar a lista de produtos.'));
 
         $.getJSON('/api/get_fornecedores_comparacao.php')
             .done(response => {
                 if (!response.success) {
-                    mostrarErro(response.message || 'Não foi possível carregar os fornecedores.');
+                    showError(response.message || 'Não foi possível carregar os fornecedores.');
                     return;
                 }
-                $fornecedores.empty();
-                (response.data || []).forEach(item => {
-                    $fornecedores.append(new Option(item.Nome, item.Codigo));
-                });
-                $fornecedores.select2({
-                    placeholder: 'Todos os fornecedores',
-                    allowClear: true,
-                    width: '100%',
-                    closeOnSelect: false
-                });
+                supplierPicker.setOptions(response.data || []);
             })
-            .fail(() => mostrarErro('Erro ao carregar a lista de fornecedores.'));
+            .fail(() => showError('Erro ao carregar a lista de fornecedores.'));
     }
 
-    const hoje = new Date();
-    const inicio = new Date();
-    inicio.setMonth(inicio.getMonth() - 3);
-    $('#dataFim').val(dataLocal(hoje));
-    $('#dataInicio').val(dataLocal(inicio));
+    const today = new Date();
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - 3);
+    document.getElementById('dataFim').value = localDate(today);
+    document.getElementById('dataInicio').value = localDate(startDate);
+    loadFilterOptions();
 
-    carregarFiltros();
-
-    $form.on('submit', function (event) {
+    form.addEventListener('submit', event => {
         event.preventDefault();
-        gerarComparacao();
+        generateComparison();
     });
+    document.getElementById('btnExportar').addEventListener('click', exportCsv);
 
-    $('#btnExportar').on('click', exportarCsv);
+    function generateComparison() {
+        clearError();
+        const products = productPicker.getValues();
+        const dateStart = document.getElementById('dataInicio').value;
+        const dateEnd = document.getElementById('dataFim').value;
 
-    function gerarComparacao() {
-        limparErro();
-        const produtos = $produto.val() || [];
-        const dataInicio = $('#dataInicio').val();
-        const dataFim = $('#dataFim').val();
-
-        if (produtos.length === 0) {
-            mostrarErro('Selecione pelo menos um produto.');
+        if (!products.length) {
+            showError('Selecione pelo menos um produto.');
+            productPicker.focus();
             return;
         }
-        if (!dataInicio || !dataFim || dataFim < dataInicio) {
-            mostrarErro('Informe um período válido. A data final deve ser igual ou posterior à inicial.');
+        if (!dateStart || !dateEnd || dateEnd < dateStart) {
+            showError('Informe um período válido. A data final deve ser igual ou posterior à inicial.');
             return;
         }
 
-        $botaoGerar.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status"></span>Consultando');
-        $('#estadoResultados').html('<span class="spinner-border spinner-border-sm me-2"></span>Buscando notas e calculando os preços...').removeClass('d-none');
-        $('#containerTabela').prop('hidden', true);
-        $('#estadoGrafico').html('<span class="spinner-border spinner-border-sm me-2"></span>Montando o comparativo...').removeClass('d-none');
-        $('#containerGrafico').prop('hidden', true);
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Consultando';
+        document.getElementById('estadoResultados').textContent = 'Buscando notas e calculando os preços...';
+        document.getElementById('estadoResultados').classList.remove('d-none');
+        document.getElementById('containerTabela').hidden = true;
+        document.getElementById('estadoGrafico').textContent = 'Montando o comparativo...';
+        document.getElementById('estadoGrafico').classList.remove('d-none');
+        document.getElementById('containerGrafico').hidden = true;
 
-        $.getJSON('/api/get_comparacao_precos.php', $form.serialize())
+        $.getJSON('/api/get_comparacao_precos.php', $(form).serialize())
             .done(response => {
                 if (!response.success) {
-                    mostrarErro(response.message || 'Não foi possível gerar a comparação.');
-                    mostrarEstadoResultados('Não foi possível carregar os resultados.');
-                    mostrarEstadoGrafico('Não foi possível carregar o gráfico.');
+                    showError(response.message || 'Não foi possível gerar a comparação.');
+                    showResultsState('Não foi possível carregar os resultados.');
+                    showChartState('Não foi possível carregar o gráfico.');
                     return;
                 }
-                resultadosAtuais = response.data || [];
-                if (resultadosAtuais.length === 0) {
-                    mostrarEstadoResultados('Nenhuma nota de compra ativa encontrada para os produtos, fornecedores e período selecionados.');
-                    mostrarEstadoGrafico('Não há dados para montar o gráfico com estes filtros.');
-                    $('#infoComparacao').text('Nenhum registro encontrado para o período selecionado.');
+
+                currentRows = response.data || [];
+                if (!currentRows.length) {
+                    showResultsState('Nenhuma nota de compra ativa encontrada para os produtos, fornecedores e período selecionados.');
+                    showChartState('Não há dados para montar o gráfico com estes filtros.');
+                    document.getElementById('infoComparacao').textContent = 'Nenhum registro encontrado para o período selecionado.';
                     return;
                 }
-                atualizarTabela(resultadosAtuais);
-                atualizarResumo(resultadosAtuais, response);
-                atualizarGrafico(resultadosAtuais);
-                $('#estadoResultados').addClass('d-none');
-                $('#containerTabela').prop('hidden', false);
-                $('#btnExportar').prop('disabled', false);
+
+                renderTable(currentRows);
+                renderSummary(currentRows, response);
+                renderChart(currentRows);
+                document.getElementById('estadoResultados').classList.add('d-none');
+                document.getElementById('containerTabela').hidden = false;
+                document.getElementById('btnExportar').disabled = false;
             })
             .fail(xhr => {
-                const mensagem = xhr.responseJSON?.message || 'Falha ao consultar os preços. Verifique os filtros e tente novamente.';
-                mostrarErro(mensagem);
-                mostrarEstadoResultados('Não foi possível carregar os resultados.');
-                mostrarEstadoGrafico('Não foi possível carregar o gráfico.');
+                showError(xhr.responseJSON?.message || 'Falha ao consultar os preços. Verifique os filtros e tente novamente.');
+                showResultsState('Não foi possível carregar os resultados.');
+                showChartState('Não foi possível carregar o gráfico.');
             })
             .always(() => {
-                $botaoGerar.prop('disabled', false).html('<i class="fas fa-chart-line me-1"></i>Comparar');
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-chart-line me-1"></i>Comparar preços';
             });
     }
 
-    function atualizarResumo(data, response) {
-        const produtos = new Map();
-        const fornecedores = new Set();
-        let menor = null;
+    function renderSummary(rows, response) {
+        const products = new Set(rows.map(row => String(row.produto_codigo)));
+        const suppliers = new Set(rows.map(row => String(row.fornecedor_codigo)));
+        const lowest = rows.reduce((best, row) =>
+            !best || Number(row.preco_medio) < Number(best.preco_medio) ? row : best, null);
 
-        data.forEach(row => {
-            produtos.set(String(row.produto_codigo), row.produto_nome);
-            fornecedores.add(String(row.fornecedor_codigo));
-            if (!menor || Number(row.preco_medio) < Number(menor.preco_medio)) {
-                menor = row;
-            }
-        });
+        document.getElementById('resumoProdutos').textContent = products.size;
+        document.getElementById('resumoFornecedores').textContent = suppliers.size;
+        document.getElementById('resumoMenorPreco').textContent = lowest ? money(lowest.preco_medio) : '—';
+        document.getElementById('resumoMenorPrecoDetalhe').textContent =
+            lowest ? lowest.produto_nome + ' · ' + lowest.fornecedor_nome : '';
+        document.getElementById('cardsResumo').hidden = false;
 
-        $('#resumoProdutos').text(produtos.size);
-        $('#resumoFornecedores').text(fornecedores.size);
-        $('#resumoMenorPreco').text(menor ? dinheiro(menor.preco_medio) : '—');
-        $('#resumoMenorPrecoDetalhe').text(menor ? menor.produto_nome + ' · ' + menor.fornecedor_nome : '');
-        $('#cardsResumo').prop('hidden', false);
-
-        const periodo = response.periodo || {};
-        const inicio = (periodo.inicio || '').split('-').reverse().join('/');
-        const fim = (periodo.fim || '').split('-').reverse().join('/');
-        $('#infoComparacao').text(produtos.size + ' produto(s) · ' + fornecedores.size + ' fornecedor(es) · ' + inicio + ' a ' + fim);
+        const period = response.periodo || {};
+        const start = (period.inicio || '').split('-').reverse().join('/');
+        const end = (period.fim || '').split('-').reverse().join('/');
+        document.getElementById('infoComparacao').textContent =
+            products.size + ' produto(s) · ' + suppliers.size + ' fornecedor(es) · ' + start + ' a ' + end;
     }
 
-    function atualizarTabela(data) {
-        const menorPorProduto = {};
-        data.forEach(row => {
-            const key = String(row.produto_codigo);
-            const preco = Number(row.preco_medio);
-            if (menorPorProduto[key] === undefined || preco < menorPorProduto[key]) {
-                menorPorProduto[key] = preco;
+    function renderTable(rows) {
+        const lowestByProduct = {};
+        rows.forEach(row => {
+            const id = String(row.produto_codigo);
+            if (lowestByProduct[id] === undefined || Number(row.preco_medio) < lowestByProduct[id]) {
+                lowestByProduct[id] = Number(row.preco_medio);
             }
         });
 
-        if (tabela) {
-            tabela.destroy();
-            tabela = null;
+        if (table) {
+            table.destroy();
+            table = null;
         }
         $('#tabelaResultados').empty();
 
-        tabela = $('#tabelaResultados').DataTable({
-            data,
+        table = $('#tabelaResultados').DataTable({
+            data: rows,
             columns: [
                 {
                     title: 'Produto',
                     data: 'produto_nome',
-                    render: (value, type, row) => {
-                        if (type !== 'display') return value;
-                        return '<div class="fw-semibold">' + escapeHtml(value) + '</div><small class="text-muted">' +
-                            escapeHtml(row.unidade_medida || '') + '</small>';
-                    }
+                    render: (value, type, row) => type !== 'display'
+                        ? value
+                        : '<div class="fw-semibold">' + escapeHtml(value) + '</div><small class="text-muted">' + escapeHtml(row.unidade_medida || '') + '</small>'
                 },
                 {
                     title: 'Fornecedor',
                     data: 'fornecedor_nome',
-                    render: (value, type, row) => type === 'display'
-                        ? '<div class="fw-semibold">' + escapeHtml(value) + '</div><small class="text-muted">Cód. ' + escapeHtml(row.fornecedor_codigo) + '</small>'
-                        : value
+                    render: (value, type, row) => type !== 'display'
+                        ? value
+                        : '<div class="fw-semibold">' + escapeHtml(value) + '</div><small class="text-muted">Cód. ' + escapeHtml(row.fornecedor_codigo) + '</small>'
                 },
-                {
-                    title: 'Preço médio',
-                    data: 'preco_medio',
-                    className: 'text-end fw-semibold',
-                    render: value => dinheiro(value)
-                },
+                { title: 'Preço médio', data: 'preco_medio', className: 'text-end fw-semibold', render: value => money(value) },
                 {
                     title: 'Faixa de preço',
                     data: null,
                     className: 'text-end',
-                    render: row => dinheiro(row.preco_minimo) + ' – ' + dinheiro(row.preco_maximo)
+                    render: row => money(row.preco_minimo) + ' – ' + money(row.preco_maximo)
                 },
+                { title: 'Notas', data: 'qtd_notas', className: 'text-center' },
                 {
-                    title: 'Notas',
-                    data: 'qtd_notas',
-                    className: 'text-center'
-                },
-                {
-                    title: 'Quantidade comprada',
+                    title: 'Quantidade',
                     data: 'quantidade_total',
                     className: 'text-end',
                     render: (value, type, row) => Number(value || 0).toLocaleString('pt-BR', { maximumFractionDigits: 3 }) +
@@ -242,13 +348,10 @@ $(function () {
                     data: null,
                     orderable: false,
                     searchable: false,
-                    render: (row, type) => {
-                        if (type !== 'display') return '';
-                        const key = String(row.produto_codigo);
-                        return Number(row.preco_medio) === menorPorProduto[key]
+                    render: (row, type) => type !== 'display' ? '' :
+                        (Number(row.preco_medio) === lowestByProduct[String(row.produto_codigo)]
                             ? '<span class="badge text-bg-success"><i class="fas fa-check me-1"></i>Menor médio</span>'
-                            : '';
-                    }
+                            : '')
                 }
             ],
             order: [[0, 'asc'], [2, 'asc']],
@@ -258,26 +361,27 @@ $(function () {
         });
     }
 
-    function atualizarGrafico(data) {
-        const fornecedores = [...new Map(data.map(row => [String(row.fornecedor_codigo), row.fornecedor_nome])).entries()];
-        const produtos = [...new Map(data.map(row => [String(row.produto_codigo), row.produto_nome])).entries()];
-        const valoresPorPar = new Map(data.map(row => [String(row.produto_codigo) + ':' + String(row.fornecedor_codigo), Number(row.preco_medio)]));
+    function renderChart(rows) {
+        if (chart) chart.destroy();
 
-        if (grafico) {
-            grafico.destroy();
-        }
+        const suppliers = [...new Map(rows.map(row => [String(row.fornecedor_codigo), row.fornecedor_nome]).entries())];
+        const products = [...new Map(rows.map(row => [String(row.produto_codigo), row.produto_nome]).entries())];
+        const priceMap = new Map(rows.map(row => [
+            String(row.produto_codigo) + ':' + String(row.fornecedor_codigo),
+            Number(row.preco_medio)
+        ]));
 
-        $('#estadoGrafico').addClass('d-none');
-        $('#containerGrafico').prop('hidden', false);
+        document.getElementById('estadoGrafico').classList.add('d-none');
+        document.getElementById('containerGrafico').hidden = false;
 
-        grafico = new Chart(document.getElementById('graficoComparacao'), {
+        chart = new Chart(document.getElementById('graficoComparacao'), {
             type: 'bar',
             data: {
-                labels: fornecedores.map(item => item[1]),
-                datasets: produtos.map(([codigo, nome], index) => ({
-                    label: nome,
-                    data: fornecedores.map(([fornecedorCodigo]) => valoresPorPar.get(codigo + ':' + fornecedorCodigo) ?? null),
-                    backgroundColor: cores[index % cores.length],
+                labels: suppliers.map(item => item[1]),
+                datasets: products.map(([id, name], index) => ({
+                    label: name,
+                    data: suppliers.map(([supplierId]) => priceMap.get(id + ':' + supplierId) ?? null),
+                    backgroundColor: colors[index % colors.length],
                     borderRadius: 4
                 }))
             },
@@ -287,49 +391,36 @@ $(function () {
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
                     legend: { position: 'bottom' },
-                    tooltip: { callbacks: { label: context => context.dataset.label + ': ' + dinheiro(context.raw) } }
+                    tooltip: { callbacks: { label: context => context.dataset.label + ': ' + money(context.raw) } }
                 },
                 scales: {
                     x: { title: { display: true, text: 'Fornecedor' } },
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Preço médio' },
-                        ticks: { callback: value => dinheiro(value) }
-                    }
+                    y: { beginAtZero: true, title: { display: true, text: 'Preço médio' }, ticks: { callback: value => money(value) } }
                 }
             }
         });
     }
 
-    function mostrarEstadoGrafico(mensagem) {
-        if (grafico) {
-            grafico.destroy();
-            grafico = null;
-        }
-        $('#containerGrafico').prop('hidden', true);
-        $('#estadoGrafico').text(mensagem).removeClass('d-none');
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[character]);
     }
 
-    function exportarCsv() {
-        if (!resultadosAtuais.length) return;
-        const linhas = [
-            ['Produto', 'Unidade', 'Fornecedor', 'Preço médio', 'Menor preço', 'Maior preço', 'Notas', 'Quantidade']
-        ];
-        resultadosAtuais.forEach(row => linhas.push([
-            row.produto_nome,
-            row.unidade_medida,
-            row.fornecedor_nome,
-            row.preco_medio,
-            row.preco_minimo,
-            row.preco_maximo,
-            row.qtd_notas,
-            row.quantidade_total
+    function exportCsv() {
+        if (!currentRows.length) return;
+        const rows = [['Produto', 'Unidade', 'Fornecedor', 'Preço médio', 'Menor preço', 'Maior preço', 'Notas', 'Quantidade']];
+        currentRows.forEach(row => rows.push([
+            row.produto_nome, row.unidade_medida, row.fornecedor_nome, row.preco_medio,
+            row.preco_minimo, row.preco_maximo, row.qtd_notas, row.quantidade_total
         ]));
-        const csv = '\uFEFF' + linhas.map(linha => linha.map(value => '"' + String(value ?? '').replace(/"/g, '""') + '"').join(';')).join('\r\n');
+        const csv = '\uFEFF' + rows.map(row =>
+            row.map(value => '"' + String(value ?? '').replace(/"/g, '""') + '"').join(';')
+        ).join('\r\n');
         const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'comparacao-precos-' + dataLocal(new Date()) + '.csv';
+        link.download = 'comparacao-precos-' + localDate(new Date()) + '.csv';
         document.body.appendChild(link);
         link.click();
         link.remove();
