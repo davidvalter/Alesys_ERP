@@ -1,54 +1,56 @@
 <?php
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../configs/database.php';
+require_once __DIR__ . '/../../includes/ImageMediaStorage.php';
 
-$method = $_SERVER['REQUEST_METHOD'];
-$input = json_decode(file_get_contents('php://input'), true);
+$method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+$contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+$input = stripos($contentType, 'multipart/form-data') !== false
+    ? $_POST
+    : (json_decode(file_get_contents('php://input'), true) ?: []);
+
+$pdo = null;
+$thumbnailPath = null;
+$oldImageId = null;
 
 try {
     $pdo = getDB();
+    $isUpdate = $method === 'PUT' || !empty($input['Codigo']);
+    if (!in_array($method, ['POST', 'PUT'], true)) {
+        throw new InvalidArgumentException('Método não permitido.');
+    }
 
-    // ============================================================
-    // VALIDAÇÃO DOS CAMPOS OBRIGATÓRIOS (comuns a todos os produtos)
-    // ============================================================
-    $errors = [];
     $requiredFields = [
         'Nome' => 'Nome do produto é obrigatório',
         'UnidadeMedida' => 'Unidade de medida é obrigatória',
         'TipoProduto' => 'Tipo de produto é obrigatório'
     ];
-
-    // ============================================================
-    // VALIDAÇÃO CONDICIONAL: campos fiscais só são obrigatórios
-    // para produtos VENDÁVEIS (insumos não geram nota fiscal)
-    // ============================================================
     if (($input['TipoProduto'] ?? '') === 'vendavel') {
         $requiredFields['NCM'] = 'NCM é obrigatório para produtos vendáveis';
         $requiredFields['CFOP'] = 'CFOP é obrigatório para produtos vendáveis';
         $requiredFields['CSOSN'] = 'CSOSN é obrigatório para produtos vendáveis (Simples Nacional)';
     }
-
-    // Validação condicional: CEST obrigatório quando CSOSN é de ST (201/202/203)
     if (
         ($input['TipoProduto'] ?? '') === 'vendavel'
         && in_array($input['CSOSN'] ?? '', ['201', '202', '203'], true)
     ) {
         $requiredFields['CEST'] = 'CEST é obrigatório para produtos com ICMS-ST (CSOSN 201/202/203)';
     }
-
+    $errors = [];
     foreach ($requiredFields as $field => $message) {
         if (empty($input[$field])) {
             $errors[] = $message;
         }
     }
-
-    if (!empty($errors)) {
-        throw new Exception(implode("\n", $errors));
+    if ($errors) {
+        throw new InvalidArgumentException(implode("\n", $errors));
     }
 
-    // ============================================================
-    // PREPARA OS DADOS
-    // ============================================================
+    $codigo = $isUpdate ? (int)($input['Codigo'] ?? 0) : null;
+    if ($isUpdate && !$codigo) {
+        throw new InvalidArgumentException('Código do produto é obrigatório para atualização.');
+    }
+
     $dados = [
         'Nome' => trim($input['Nome']),
         'Descricao' => !empty($input['Descricao']) ? trim($input['Descricao']) : null,
@@ -61,70 +63,60 @@ try {
         'CFOP' => !empty($input['CFOP']) ? trim($input['CFOP']) : null,
         'CSOSN' => !empty($input['CSOSN']) ? trim($input['CSOSN']) : null,
         'CEST' => !empty($input['CEST']) ? trim($input['CEST']) : null,
-        'Ativo' => isset($input['Ativo']) ? (int) $input['Ativo'] : 1
+        'Ativo' => isset($input['Ativo']) ? (int)$input['Ativo'] : 1
     ];
 
-    // ============================================================
-    // VALIDA O NCM CONTRA A TABELA DE REFERÊNCIA (quando informado)
-    // ============================================================
-    if (!empty($dados['NCM'])) {
+    if ($dados['TipoProduto'] === 'vendavel') {
         $stmt = $pdo->prepare("SELECT 1 FROM ProdutosNCM WHERE Codigo = ?");
         $stmt->execute([$dados['NCM']]);
         if (!$stmt->fetch()) {
-            throw new Exception('NCM informado não existe na tabela de referência');
+            throw new InvalidArgumentException('NCM informado não existe na tabela de referência.');
         }
     }
-
-    // Validação do CEST contra o vínculo com o NCM (quando informado)
     if (!empty($dados['CEST'])) {
-        $stmt = $pdo->prepare("
-            SELECT 1 FROM ProdutosCESTNCM
-            WHERE CEST = ? AND NCM = ?
-        ");
+        $stmt = $pdo->prepare("SELECT 1 FROM ProdutosCESTNCM WHERE CEST = ? AND NCM = ?");
         $stmt->execute([$dados['CEST'], $dados['NCM']]);
         if (!$stmt->fetch()) {
-            throw new Exception('CEST informado não é válido para o NCM selecionado');
+            throw new InvalidArgumentException('CEST informado não é válido para o NCM selecionado.');
         }
     }
 
-    // ============================================================
-    // VERIFICA DUPLICIDADE DE CÓDIGO DE BARRAS
-    // (exceto para o próprio produto em edição)
-    // ============================================================
     if (!empty($dados['CodigoBarras'])) {
         $sqlCheck = "SELECT Codigo FROM Produtos WHERE CodigoBarras = ?";
         $params = [$dados['CodigoBarras']];
-
-        if ($method === 'PUT' && !empty($input['Codigo'])) {
+        if ($isUpdate) {
             $sqlCheck .= " AND Codigo != ?";
-            $params[] = $input['Codigo'];
+            $params[] = $codigo;
         }
-
         $stmt = $pdo->prepare($sqlCheck);
         $stmt->execute($params);
         if ($stmt->fetch()) {
-            throw new Exception('Já existe um produto cadastrado com este código de barras');
+            throw new InvalidArgumentException('Já existe um produto cadastrado com este código de barras.');
         }
     }
 
-    // ============================================================
-    // INSERT / UPDATE
-    // ============================================================
-    if ($method === 'POST') {
-        $sql = "INSERT INTO Produtos (
-            Nome, Descricao, CodigoBarras, UnidadeMedida, Categoria, DataCadastro,
-            TipoProduto, CategoriaVenda, NCM, CFOP, CSOSN, CEST, Ativo
-        ) VALUES (
-            :Nome, :Descricao, :CodigoBarras, :UnidadeMedida, :Categoria, NOW(),
-            :TipoProduto, :CategoriaVenda, :NCM, :CFOP, :CSOSN, :CEST, :Ativo
-        )";
-    } elseif ($method === 'PUT') {
-        if (empty($input['Codigo'])) {
-            throw new Exception('Código do produto é obrigatório para atualização');
+    if ($isUpdate) {
+        $stmtCurrent = $pdo->prepare('SELECT ImagemId FROM Produtos WHERE Codigo = ?');
+        $stmtCurrent->execute([$codigo]);
+        $currentImage = $stmtCurrent->fetchColumn();
+        if ($currentImage === false) {
+            throw new RuntimeException('Produto não encontrado.');
         }
+        $oldImageId = $currentImage !== null ? (int)$currentImage : null;
+    }
 
-        $dados['Codigo'] = $input['Codigo'];
+    $hasUpload = isset($_FILES['ImagemFile']) && (int)$_FILES['ImagemFile']['error'] !== UPLOAD_ERR_NO_FILE;
+    if ($hasUpload) {
+        $thumbnailPath = ImageMediaStorage::storeUploaded($_FILES['ImagemFile'], 'produtos');
+    }
 
+    $pdo->beginTransaction();
+    $dados['ImagemId'] = $thumbnailPath !== null
+        ? ImageMediaStorage::register($pdo, $thumbnailPath)
+        : $oldImageId;
+
+    if ($isUpdate) {
+        $dados['Codigo'] = $codigo;
         $sql = "UPDATE Produtos SET
             Nome = :Nome,
             Descricao = :Descricao,
@@ -137,45 +129,47 @@ try {
             CFOP = :CFOP,
             CSOSN = :CSOSN,
             CEST = :CEST,
-            Ativo = :Ativo
+            Ativo = :Ativo,
+            ImagemId = :ImagemId
         WHERE Codigo = :Codigo";
     } else {
-        throw new Exception('Método não permitido');
+        $sql = "INSERT INTO Produtos (
+            Nome, Descricao, CodigoBarras, UnidadeMedida, Categoria, DataCadastro,
+            TipoProduto, CategoriaVenda, NCM, CFOP, CSOSN, CEST, Ativo, ImagemId
+        ) VALUES (
+            :Nome, :Descricao, :CodigoBarras, :UnidadeMedida, :Categoria, NOW(),
+            :TipoProduto, :CategoriaVenda, :NCM, :CFOP, :CSOSN, :CEST, :Ativo, :ImagemId
+        )";
     }
 
     $stmt = $pdo->prepare($sql);
-    $success = $stmt->execute($dados);
+    $stmt->execute($dados);
+    if (!$isUpdate) {
+        $codigo = (int)$pdo->lastInsertId();
+    }
+    $pdo->commit();
 
-    if ($success) {
-        $response = [
-            'success' => true,
-            'message' => ($method === 'POST')
-                ? 'Produto cadastrado com sucesso!'
-                : 'Produto atualizado com sucesso!',
-            'Codigo' => ($method === 'POST')
-                ? $pdo->lastInsertId()
-                : $input['Codigo']
-        ];
-        echo json_encode($response);
-    } else {
-        throw new Exception('Erro ao salvar dados do produto');
+    if ($oldImageId && (int)$dados['ImagemId'] !== $oldImageId) {
+        ImageMediaStorage::deleteIfUnused($pdo, $oldImageId);
     }
 
-} catch (PDOException $e) {
-    error_log('PDOException: ' . $e->getMessage() . ' - SQL: ' . ($sql ?? ''));
-    http_response_code(500);
+    echo json_encode([
+        'success' => true,
+        'message' => $isUpdate ? 'Produto atualizado com sucesso!' : 'Produto cadastrado com sucesso!',
+        'Codigo' => $codigo
+    ], JSON_UNESCAPED_UNICODE);
+} catch (Throwable $e) {
+    if ($pdo instanceof PDO && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    if ($thumbnailPath !== null) {
+        ImageMediaStorage::deleteFiles($thumbnailPath);
+    }
+    error_log('Erro ao salvar produto: ' . $e->getMessage());
+    $isUserError = $e instanceof InvalidArgumentException;
+    http_response_code($isUserError ? 400 : 500);
     echo json_encode([
         'success' => false,
-        'message' => 'Erro no banco de dados',
-        'error' => $e->getMessage(),
-        'sql' => $sql ?? null
-    ]);
-} catch (Exception $e) {
-    error_log('Exception: ' . $e->getMessage());
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage()
-    ]);
+        'message' => $isUserError ? $e->getMessage() : 'Não foi possível salvar o produto.'
+    ], JSON_UNESCAPED_UNICODE);
 }
-?>
