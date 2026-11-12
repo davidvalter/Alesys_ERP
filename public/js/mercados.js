@@ -18,15 +18,24 @@ $(document).ready(function () {
         fluxoFornecedorAleNFE = { aoSalvar, aoCancelar };
         $('#modalTitle').text('Novo Fornecedor');
         $('#formMercado')[0].reset();
+        $('#formMercado').find('.error-text').remove();
+        $('#formMercado').find('.has-error').removeClass('has-error');
         $('#mercadoCodigo').val('');
         $('#nome').val(dados.Nome || '');
         $('#razaoSocial').val(dados.RazaoSocial || '');
-        $('#cnpj').val(dados.CNPJ || '').trigger('input');
+        const cnpj = (dados.CNPJ || '').replace(/\D/g, '');
+        const cep = (dados.CEP || '').replace(/\D/g, '');
+        if ($.fn.inputmask) {
+            $('#cnpj').inputmask('setvalue', cnpj);
+            $('#cep').inputmask('setvalue', cep);
+        } else {
+            $('#cnpj').val(cnpj);
+            $('#cep').val(cep);
+        }
         $('#inscricaoEstadual').val(dados.InscricaoEstadual || '');
         $('#email').val(dados.Email || '');
         $('#telefone').val(dados.Telefone || '');
         $('#endereco').val(dados.Endereco || '');
-        $('#cep').val(dados.CEP || '').trigger('input');
         $('#municipio').val(dados.Municipio || '');
         $('#estado').val(dados.Estado || '');
         modalMercado.show();
