@@ -68,6 +68,10 @@
             .on('click', '.btn-desativar', handleDeactivate)
             .on('click', '.btn-excluir', handleDelete);
         $('#tipoProduto').on('change', toggleCamposFiscais);
+        $('#imagemProdutoPreview').on('error', function () {
+            this.onerror = null;
+            this.src = IMAGE_PLACEHOLDER;
+        });
         $('#imagemProdutoFile').on('change', function () {
             const file = this.files && this.files[0];
             if (!file) return;
