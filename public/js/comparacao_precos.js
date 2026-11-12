@@ -123,7 +123,10 @@ $(function () {
         $.getJSON('/api/get_comparacao_precos.php', $form.serialize())
             .done(response => {
                 if (!response.success) {
-                    throw new Error(response.message || 'Não foi possível gerar a comparação.');
+                    mostrarErro(response.message || 'Não foi possível gerar a comparação.');
+                    mostrarEstadoResultados('Não foi possível carregar os resultados.');
+                    mostrarEstadoGrafico('Não foi possível carregar o gráfico.');
+                    return;
                 }
                 resultadosAtuais = response.data || [];
                 if (resultadosAtuais.length === 0) {
