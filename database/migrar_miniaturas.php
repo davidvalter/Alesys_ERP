@@ -29,8 +29,11 @@ function caminhoLegadoLocal(string $webPath): ?string
     }
 
     $publicRoot = realpath(__DIR__ . '/../public');
+    if ($publicRoot === false) {
+        return null;
+    }
     $filePath = realpath($publicRoot . str_replace('/', DIRECTORY_SEPARATOR, $webPath));
-    if ($publicRoot === false || $filePath === false || !is_file($filePath)) {
+    if ($filePath === false || !is_file($filePath)) {
         return null;
     }
 
