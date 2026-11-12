@@ -110,11 +110,8 @@ $(document).ready(function () {
     // Controle do modal - versão com verificação de erros
     $('#btnNovoMercado').on('click', function () {
         try {
-            $('#modalTitle').text('Novo Mercado');
-            $('#formMercado')[0].reset();
-            $('#mercadoCodigo').val('');
-            modalMercado.show();
-            console.log('Modal aberto com sucesso');
+            window.abrirModalNovoFornecedor();
+            console.log('Modal de fornecedor aberto com sucesso');
         } catch (e) {
             console.error('Erro ao abrir modal:', e);
         }
