@@ -1,110 +1,104 @@
 <?php
 // public/api/save_prato.php
-require_once '../../configs/database.php';
-require_once '../conf/logger.php'; // importa logger
+require_once __DIR__ . '/../../configs/database.php';
+require_once __DIR__ . '/../../includes/ImageMediaStorage.php';
+require_once __DIR__ . '/../conf/logger.php';
 session_start();
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
+
+$pdo = null;
+$thumbnailPath = null;
+$oldImageId = null;
+$newImageId = null;
+
 try {
-    $db = getDB();
-    $id = $_POST['id'] ?? null;
-    $nome = $_POST['nome'] ?? '';
+    $pdo = getDB();
+    $id = !empty($_POST['id']) ? (int)$_POST['id'] : null;
+    $nome = trim($_POST['nome'] ?? '');
     $categoria = $_POST['categoria'] ?? '';
-    $preco = $_POST['preco'] ?? 0;
-    $status = 1; // sempre ativo no cadastro
-    $responsavelId = $_SESSION['user_id'] ?? 1; // pegar do login
+    $preco = (float)($_POST['preco'] ?? 0);
+    $responsavelId = (int)($_SESSION['Usuario']['id'] ?? $_SESSION['user_id'] ?? 1);
 
-    // Campos fiscais
-    $ncm = trim($_POST['ncm'] ?? '');
-    $cest = trim($_POST['cest'] ?? '');
-    $cfop = trim($_POST['cfop'] ?? '');
-    $csosn = trim($_POST['csosn'] ?? '');
-    $unidade = trim($_POST['unidade_medida'] ?? '') ?: 'UN';
+    if ($nome === '' || $categoria === '' || $preco < 0) {
+        throw new InvalidArgumentException('Informe nome, categoria e preço válidos para o prato.');
+    }
 
-    $uploadDir = __DIR__ . '/../uploads/pratos/';
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
+    $dadosFiscais = [
+        trim($_POST['ncm'] ?? ''),
+        trim($_POST['cest'] ?? ''),
+        trim($_POST['cfop'] ?? ''),
+        trim($_POST['csosn'] ?? ''),
+        trim($_POST['unidade_medida'] ?? '') ?: 'UN'
+    ];
+
+    $hasUpload = isset($_FILES['foto']) && (int)$_FILES['foto']['error'] !== UPLOAD_ERR_NO_FILE;
+    if ($hasUpload) {
+        $thumbnailPath = ImageMediaStorage::storeUploaded($_FILES['foto'], 'pratos');
     }
-    // Upload da foto (se enviada)
-    $fotoNome = null;
-    if (!empty($_FILES['foto']['name'])) {
-        $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
-        $fotoNome = uniqid('prato_') . '.' . $ext;
-        $destino = $uploadDir . $fotoNome;
-        if (!move_uploaded_file($_FILES['foto']['tmp_name'], $destino)) {
-            throw new Exception("Erro ao salvar a foto do prato.");
-        }
-    }
+
+    $pdo->beginTransaction();
     if ($id) {
-        // Atualizar prato
-        if ($fotoNome) {
-            $sql = "UPDATE Pratos SET Nome=?, Categoria=?, Preco=?, Foto=?,
-                    NCM=?, CEST=?, CFOP=?, CSOSN=?, UnidadeMedida=?, ResponsavelId=?
-                    WHERE Id=?";
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
-                $nome,
-                $categoria,
-                $preco,
-                $fotoNome,
-                $ncm,
-                $cest,
-                $cfop,
-                $csosn,
-                $unidade,
-                $responsavelId,
-                $id
-            ]);
-        } else {
-            $sql = "UPDATE Pratos SET Nome=?, Categoria=?, Preco=?,
-                    NCM=?, CEST=?, CFOP=?, CSOSN=?, UnidadeMedida=?, ResponsavelId=?
-                    WHERE Id=?";
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
-                $nome,
-                $categoria,
-                $preco,
-                $ncm,
-                $cest,
-                $cfop,
-                $csosn,
-                $unidade,
-                $responsavelId,
-                $id
-            ]);
+        $stmtCurrent = $pdo->prepare('SELECT ImagemId FROM Pratos WHERE Id = ?');
+        $stmtCurrent->execute([$id]);
+        $currentImage = $stmtCurrent->fetchColumn();
+        if ($currentImage === false) {
+            throw new RuntimeException('Prato não encontrado.');
         }
-    } else {
-        // Novo prato
-        $sql = "INSERT INTO Pratos (Nome, Categoria, Preco, Foto, Status, ResponsavelId,
-                NCM, CEST, CFOP, CSOSN, UnidadeMedida)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt = $db->prepare($sql);
-        $stmt->execute([
-            $nome,
-            $categoria,
-            $preco,
-            $fotoNome,
-            $status,
-            $responsavelId,
-            $ncm,
-            $cest,
-            $cfop,
-            $csosn,
-            $unidade
-        ]);
-        $id = $db->lastInsertId();
+        $oldImageId = $currentImage !== null ? (int)$currentImage : null;
     }
-    if (ob_get_level())
-        ob_end_clean();
-    echo json_encode(['success' => true, 'id' => $id]);
-    exit;
-} catch (Exception $e) {
-    if (ob_get_level())
-        ob_end_clean();
-    // Grava no log
-    logError("Erro ao salvar prato: " . $e->getMessage(), [
+
+    $newImageId = $thumbnailPath !== null
+        ? ImageMediaStorage::register($pdo, $thumbnailPath)
+        : $oldImageId;
+
+    if ($id) {
+        $sql = "UPDATE Pratos
+                SET Nome=?, Categoria=?, Preco=?, ImagemId=?,
+                    NCM=?, CEST=?, CFOP=?, CSOSN=?, UnidadeMedida=?, ResponsavelId=?
+                WHERE Id=?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(array_merge(
+            [$nome, $categoria, $preco, $newImageId],
+            $dadosFiscais,
+            [$responsavelId, $id]
+        ));
+    } else {
+        $sql = "INSERT INTO Pratos
+                (Nome, Categoria, Preco, Status, ResponsavelId, ImagemId,
+                 NCM, CEST, CFOP, CSOSN, UnidadeMedida)
+                VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(array_merge(
+            [$nome, $categoria, $preco, $responsavelId, $newImageId],
+            $dadosFiscais
+        ));
+        $id = (int)$pdo->lastInsertId();
+    }
+
+    $pdo->commit();
+
+    if ($oldImageId && $newImageId !== $oldImageId) {
+        ImageMediaStorage::deleteIfUnused($pdo, $oldImageId);
+    }
+
+    echo json_encode(['success' => true, 'id' => $id], JSON_UNESCAPED_UNICODE);
+} catch (Throwable $e) {
+    if ($pdo instanceof PDO && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    if ($thumbnailPath !== null) {
+        ImageMediaStorage::deleteFiles($thumbnailPath);
+    }
+    logError('Erro ao salvar prato: ' . $e->getMessage(), [
         'post' => $_POST,
-        'files' => $_FILES
+        'files' => array_keys($_FILES)
     ]);
-    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    http_response_code($e instanceof InvalidArgumentException ? 400 : 500);
+    echo json_encode([
+        'success' => false,
+        'error' => $e instanceof InvalidArgumentException
+            ? $e->getMessage()
+            : 'Não foi possível salvar o prato. Verifique os dados e a configuração de imagens.'
+    ], JSON_UNESCAPED_UNICODE);
 }
