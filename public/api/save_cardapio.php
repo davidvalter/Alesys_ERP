@@ -67,8 +67,7 @@ try {
     }
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':id' => $id,
+    $params = [
         ':nome' => $nome,
         ':tipo' => $tipoItem,
         ':produto' => $tipoItem === 'produto' ? $produtoId : null,
@@ -76,7 +75,11 @@ try {
         ':preco' => $preco,
         ':categoria' => $categoria !== '' ? $categoria : null,
         ':ativo' => $ativo
-    ]);
+    ];
+    if ($id) {
+        $params[':id'] = $id;
+    }
+    $stmt->execute($params);
 
     if (!$id) {
         $id = (int)$pdo->lastInsertId();
