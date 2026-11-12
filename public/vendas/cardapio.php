@@ -148,12 +148,12 @@ try {
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Imagem</label>
-                        <input type="file" id="ImagemFile" class="form-control" accept="image/*">
-                    </div>
-
-                    <div class="mb-3 text-center">
-                        <img id="previewImagem" src="" style="max-height:120px; display:none; border-radius:8px;">
+                        <label class="form-label">Imagem do produto ou prato</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <img id="previewImagem" src="/images/no-image.png" alt="Miniatura herdada do produto ou prato"
+                                width="96" height="96" style="object-fit:contain;border-radius:8px;">
+                            <small class="text-muted">A imagem é herdada do produto ou prato vinculado. Para alterá-la, edite o cadastro correspondente.</small>
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -194,7 +194,6 @@ try {
     </div>
 </div>
 
-<?php require_once __DIR__ . '/../templates/footer_protected_v2.php'; ?>
-
-<!-- Scripts -->
 <script src="/js/cardapio.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/js/cardapio.js') ?>"></script>
+
+<?php require_once __DIR__ . '/../templates/footer_protected_v2.php'; ?>
