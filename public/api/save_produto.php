@@ -150,7 +150,11 @@ try {
     $pdo->commit();
 
     if ($oldImageId && (int)$dados['ImagemId'] !== $oldImageId) {
-        ImageMediaStorage::deleteIfUnused($pdo, $oldImageId);
+        try {
+            ImageMediaStorage::deleteIfUnused($pdo, $oldImageId);
+        } catch (Throwable $cleanupError) {
+            error_log('Não foi possível limpar a miniatura antiga do produto: ' . $cleanupError->getMessage());
+        }
     }
 
     echo json_encode([
