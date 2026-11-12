@@ -32,6 +32,10 @@ if (!$note['XMLCompleto'] || $note['TipoXML'] === null || !$note['NaturezaOperac
     $note['FornecedorCNPJ'] = $parsed['emitCnpj'] ?: $note['FornecedorCNPJ'];
     $note['FornecedorNome'] = $parsed['emitNome'] ?: $note['FornecedorNome'];
 }
+$dadosXmlFornecedor = alenfeComprasParseXml((string)$note['XMLCompleto']);
+if (!$dadosXmlFornecedor) {
+    alenfeComprasJson(['success' => false, 'message' => 'Não foi possível extrair os dados fiscais e cadastrais do XML da nota.'], 422);
+}
 if ((int)$note['TipoXML'] < 0 || (int)$note['TipoXML'] > 1 || trim((string)$note['NaturezaOperacaoXML']) === '') {
     alenfeComprasJson(['success' => false, 'message' => 'XML sem tipo ou natureza da operação válidos.'], 422);
 }
@@ -87,6 +91,17 @@ alenfeComprasJson([
         'ValorTotal' => $note['ValorTotal'], 'FornecedorNome' => $note['FornecedorNome'],
         'FornecedorCNPJ' => $note['FornecedorCNPJ'], 'Tipo' => (int)$note['TipoXML'],
         'NaturezaOperacao' => $note['NaturezaOperacaoXML'], 'MercadoCodigoSugerido' => $marketMatch,
+        'fornecedorDados' => [
+            'Nome' => $dadosXmlFornecedor['emitFantasia'] ?: ($dadosXmlFornecedor['emitNome'] ?? $note['FornecedorNome']),
+            'RazaoSocial' => $dadosXmlFornecedor['emitNome'] ?? $note['FornecedorNome'],
+            'CNPJ' => $dadosXmlFornecedor['emitCnpj'] ?: $note['FornecedorCNPJ'],
+            'InscricaoEstadual' => $dadosXmlFornecedor['inscricaoEstadual'],
+            'Endereco' => $dadosXmlFornecedor['endereco'],
+            'CEP' => $dadosXmlFornecedor['cep'],
+            'Municipio' => $dadosXmlFornecedor['municipio'],
+            'Estado' => $dadosXmlFornecedor['estado'],
+            'Telefone' => $dadosXmlFornecedor['telefone'],
+        ],
         'ImportadaNFeId' => $alreadyImported ?: null
     ],
     'mercados' => $markets,
