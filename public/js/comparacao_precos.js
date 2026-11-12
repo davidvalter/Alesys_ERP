@@ -262,13 +262,16 @@ $(function () {
     function renderSummary(rows, response) {
         const products = new Set(rows.map(row => String(row.produto_codigo)));
         const suppliers = new Set(rows.map(row => String(row.fornecedor_codigo)));
-        const lowest = rows.reduce((best, row) =>
+        const positivePriceRows = rows.filter(row => Number(row.preco_medio) > 0);
+        const lowest = positivePriceRows.reduce((best, row) =>
             !best || Number(row.preco_medio) < Number(best.preco_medio) ? row : best, null);
 
         document.getElementById('resumoProdutos').textContent = products.size;
         document.getElementById('resumoFornecedores').textContent = suppliers.size;
-        document.getElementById('resumoMenorPreco').textContent = lowest ? money(lowest.preco_medio) : '—';
-        document.getElementById('resumoMenorPrecoDetalhe').textContent = lowest ? lowest.produto_nome + ' · ' + lowest.fornecedor_nome : '';
+        document.getElementById('resumoMenorPreco').textContent = lowest ? money(lowest.preco_medio) : 'Sem preço válido';
+        document.getElementById('resumoMenorPrecoDetalhe').textContent = lowest
+            ? lowest.produto_nome + ' · ' + lowest.fornecedor_nome
+            : 'Confira os preços unitários nas notas de compra.';
         document.getElementById('cardsResumo').hidden = false;
 
         const period = response.periodo || {};
@@ -282,6 +285,7 @@ $(function () {
         const lowestByProduct = {};
         rows.forEach(row => {
             const id = String(row.produto_codigo);
+            if (Number(row.preco_medio) <= 0) return;
             if (lowestByProduct[id] === undefined || Number(row.preco_medio) < lowestByProduct[id]) {
                 lowestByProduct[id] = Number(row.preco_medio);
             }
@@ -326,7 +330,7 @@ $(function () {
                     orderable: false,
                     searchable: false,
                     render: (row, type) => type !== 'display' ? '' :
-                        (Number(row.preco_medio) === lowestByProduct[String(row.produto_codigo)]
+                        (Number(row.preco_medio) > 0 && Number(row.preco_medio) === lowestByProduct[String(row.produto_codigo)]
                             ? '<span class="badge text-bg-success"><i class="fas fa-check me-1"></i>Menor médio</span>'
                             : '')
                 }
