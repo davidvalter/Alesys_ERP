@@ -3,34 +3,57 @@
         <h6 class="mb-0"><i class="fas fa-sliders me-2 text-success"></i>Filtros da análise</h6>
     </div>
     <div class="card-body pt-2">
-        <form id="formFiltros">
-            <div class="row g-3 align-items-end">
+        <form id="formFiltros" novalidate>
+            <div class="row g-3 align-items-start">
                 <div class="col-12 col-xl-5">
-                    <label for="produto" class="form-label fw-semibold">Produtos</label>
-                    <select id="produto" name="produto[]" class="form-select" multiple required aria-describedby="ajudaProdutos"></select>
-                    <div id="ajudaProdutos" class="form-text">Selecione um ou mais produtos. Ex.: compare marcas diferentes.</div>
+                    <label class="form-label fw-semibold">Produtos <span class="text-danger">*</span></label>
+                    <div class="multi-picker" data-picker="produto">
+                        <input type="search" class="form-control multi-picker-search" placeholder="Buscar e selecionar produtos..." autocomplete="off" aria-label="Buscar produtos" aria-expanded="false">
+                        <div class="multi-picker-menu" hidden>
+                            <div class="multi-picker-options"></div>
+                        </div>
+                        <div class="multi-picker-values"></div>
+                        <div class="multi-picker-selected" aria-live="polite"></div>
+                    </div>
+                    <div class="form-text">Selecione um ou mais produtos. Ex.: compare marcas diferentes.</div>
                 </div>
-                <div class="col-12 col-xl-3">
-                    <label for="fornecedores" class="form-label fw-semibold">Fornecedores</label>
-                    <select id="fornecedores" name="fornecedores[]" class="form-select" multiple></select>
-                    <div class="form-text">Opcional: vazio inclui todos.</div>
+
+                <div class="col-12 col-xl-4">
+                    <label class="form-label fw-semibold">Fornecedores</label>
+                    <div class="multi-picker" data-picker="fornecedor">
+                        <input type="search" class="form-control multi-picker-search" placeholder="Todos os fornecedores" autocomplete="off" aria-label="Buscar fornecedores" aria-expanded="false">
+                        <div class="multi-picker-menu" hidden>
+                            <div class="multi-picker-options"></div>
+                        </div>
+                        <div class="multi-picker-values"></div>
+                        <div class="multi-picker-selected" aria-live="polite"></div>
+                    </div>
+                    <div class="form-text">Opcional: sem seleção, serão incluídos todos.</div>
                 </div>
-                <div class="col-6 col-xl-1">
-                    <label for="dataInicio" class="form-label fw-semibold">De</label>
-                    <input type="date" id="dataInicio" name="dataInicio" class="form-control" required>
-                </div>
-                <div class="col-6 col-xl-1">
-                    <label for="dataFim" class="form-label fw-semibold">Até</label>
-                    <input type="date" id="dataFim" name="dataFim" class="form-control" required>
-                </div>
-                <div class="col-12 col-xl-2 d-flex gap-2">
-                    <button type="submit" id="btnGerarComparacao" class="btn btn-success flex-grow-1">
-                        <i class="fas fa-chart-line me-1"></i>Comparar
-                    </button>
-                    <button type="button" id="btnExportar" class="btn btn-outline-secondary" disabled title="Gere uma comparação para exportar" aria-label="Exportar comparação em CSV">
-                        <i class="fas fa-file-csv"></i>
-                    </button>
-                </div>
+
+                <fieldset class="col-12 col-xl-3 border-0 m-0 p-0">
+                    <legend class="form-label fw-semibold fs-6 mb-2">Período</legend>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label for="dataInicio" class="form-label small text-muted">De</label>
+                            <input type="date" id="dataInicio" name="dataInicio" class="form-control" required>
+                        </div>
+                        <div class="col-6">
+                            <label for="dataFim" class="form-label small text-muted">Até</label>
+                            <input type="date" id="dataFim" name="dataFim" class="form-control" required>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <button type="submit" id="btnGerarComparacao" class="btn btn-success">
+                    <i class="fas fa-chart-line me-1"></i>Comparar preços
+                </button>
+                <button type="button" id="btnExportar" class="btn btn-outline-secondary" disabled>
+                    <i class="fas fa-file-csv me-1"></i>Exportar CSV
+                </button>
+                <span class="small text-muted align-self-center ms-md-2">Os valores são calculados com base nas notas de compra ativas.</span>
             </div>
             <div id="erroFiltros" class="alert alert-danger py-2 mt-3 mb-0 d-none" role="alert"></div>
         </form>
