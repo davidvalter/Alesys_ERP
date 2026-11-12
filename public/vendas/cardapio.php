@@ -43,7 +43,7 @@ try {
                 Voltar
             </a>
 
-            <button id="btnNovo" class="btn btn-success btn-sm">
+            <button id="btnNovo" type="button" class="btn btn-success btn-sm">
                 <i class="fas fa-plus me-1"></i>
                 Novo Item
             </button>
