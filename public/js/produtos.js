@@ -135,7 +135,7 @@
             Codigo: $('#produtoCodigo').val(),
             Nome: $('#nome').val().trim(),
             Descricao: $('#descricao').val().trim(),
-            CodigoBarras: $('#codigoBarras').val().replace(/[^\\d]/g, ''),
+            CodigoBarras: $('#codigoBarras').val().replace(/[^\d]/g, ''),
             UnidadeMedida: $('#unidadeMedida').val(),
             Categoria: $('#categoria').val().trim(),
             TipoProduto: $('#tipoProduto').val(),
