@@ -68,6 +68,13 @@
             .on('click', '.btn-desativar', handleDeactivate)
             .on('click', '.btn-excluir', handleDelete);
         $('#tipoProduto').on('change', toggleCamposFiscais);
+        $('#imagemProdutoFile').on('change', function () {
+            const file = this.files && this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = event => $('#imagemProdutoPreview').attr('src', event.target.result);
+            reader.readAsDataURL(file);
+        });
 
         // Modal de NCM
         $('#btnBuscarNcm').on('click', abrirModalNcm);
@@ -119,29 +126,34 @@
             showAlert('Por favor, corrija os erros no formulário', 'error', 5000);
             return;
         }
+
         var $submitBtn = $(this).find('button[type="submit"]');
         $submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Salvando...');
-        var formData = {
+
+        var formData = new FormData(this);
+        var fields = {
             Codigo: $('#produtoCodigo').val(),
             Nome: $('#nome').val().trim(),
             Descricao: $('#descricao').val().trim(),
-            CodigoBarras: $('#codigoBarras').val().replace(/[^\d]/g, ''),
+            CodigoBarras: $('#codigoBarras').val().replace(/[^\\d]/g, ''),
             UnidadeMedida: $('#unidadeMedida').val(),
-            Categoria: $('#categoria').val().trim() || null,
+            Categoria: $('#categoria').val().trim(),
             TipoProduto: $('#tipoProduto').val(),
-            CategoriaVenda: $('#categoriaVenda').val() || null,
-            NCM: $('#ncm').val() || null,
-            CFOP: $('#cfop').val() || null,
-            CSOSN: $('#csosn').val() || null,
-            CEST: $('#cest').val() || null,
+            CategoriaVenda: $('#categoriaVenda').val(),
+            NCM: $('#ncm').val(),
+            CFOP: $('#cfop').val(),
+            CSOSN: $('#csosn').val(),
+            CEST: $('#cest').val(),
             Ativo: $('#ativo').is(':checked') ? 1 : 0
         };
-        var method = formData.Codigo ? 'PUT' : 'POST';
+        Object.keys(fields).forEach(key => formData.set(key, fields[key] == null ? '' : fields[key]));
+
         $.ajax({
             url: '/api/save_produto.php',
-            type: method,
-            contentType: 'application/json',
-            data: JSON.stringify(formData),
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
             dataType: 'json',
             success: function (response) {
                 if (response.success) {
@@ -153,12 +165,10 @@
                 }
             },
             error: function (xhr) {
-                var errorMsg = 'Erro na requisição';
-                try {
-                    var json = xhr.responseJSON;
-                    if (json && json.error_details) errorMsg += '\nDetalhes: ' + json.error_details;
-                } catch (e) { }
-                showAlert(errorMsg, 'error');
+                var message = xhr.responseJSON && xhr.responseJSON.message
+                    ? xhr.responseJSON.message
+                    : 'Erro ao salvar o produto.';
+                showAlert(message, 'error');
                 $submitBtn.prop('disabled', false).html('<i class="fas fa-save"></i> Salvar');
             }
         });
