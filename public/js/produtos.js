@@ -97,6 +97,7 @@
             $('#modalTitle').text('Novo Produto');
             $(MODULE_SELECTOR.form)[0].reset();
             $('#produtoCodigo').val('');
+            $('#imagemProdutoPreview').attr('src', IMAGE_PLACEHOLDER);
             $('#unidadeMedida').val('UN');
             $('#tipoProduto').val('insumo');
             $('#categoriaVenda').val('');
@@ -237,6 +238,7 @@
                 $('#modalTitle').text('Editar Produto');
                 $('#produtoCodigo').val(produto.Codigo);
                 $('#nome').val(produto.Nome);
+                $('#imagemProdutoPreview').attr('src', produto.Imagem || IMAGE_PLACEHOLDER);
                 $('#descricao').val(produto.Descricao);
                 $('#codigoBarras').val(produto.CodigoBarras);
                 $('#unidadeMedida').val(produto.UnidadeMedida);
