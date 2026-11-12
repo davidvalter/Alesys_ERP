@@ -347,6 +347,5 @@ try {
         </div>
     </div>
 </div>
-<?php require_once __DIR__ . '/../templates/footer_protected_v2.php'; ?>
-<!-- Scripts -->
 <script src="/js/produtos.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/js/produtos.js') ?>"></script>
+<?php require_once __DIR__ . '/../templates/footer_protected_v2.php'; ?>
