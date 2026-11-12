@@ -228,7 +228,7 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
         modal?.show();
         try {
             const response = await fetch('/api/alenfe_compras_detalhe.php?id=' + encodeURIComponent(id), {credentials:'same-origin'});
-            const data = await response.json();
+            const data = await parseApiResponse(response);
             if (!response.ok || !data.success) throw new Error(data.message || 'Não foi possível carregar a nota.');
             activeNote = data.nota;
             activeItems = data.itens;
@@ -277,7 +277,7 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
                     timer = setTimeout(async () => {
                         try {
                             const response = await fetch('/api/alenfe_compras_produtos.php?q=' + encodeURIComponent(query), {credentials:'same-origin'});
-                            const data = await response.json();
+                            const data = await parseApiResponse(response);
                             if (!response.ok || !data.success) throw new Error(data.message || 'Falha ao buscar produtos.');
                             const previous = select.value;
                             select.innerHTML = '<option value="">Selecione produto…</option>' + data.produtos.map(p => '<option value="'+esc(p.Codigo)+'">'+esc(p.Nome)+' · '+esc(p.UnidadeMedida || 'UN')+(p.NCM ? ' · NCM '+esc(p.NCM) : '')+'</option>').join('');
@@ -348,7 +348,7 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
                 method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},
                 body:JSON.stringify({importacaoId:activeNote.id, mercadoCodigo:document.getElementById('fornecedorAlesys').value, itens:mappings})
             });
-            const data = await response.json();
+            const data = await parseApiResponse(response);
             if (!response.ok || !data.success) throw new Error(data.message || 'Falha ao importar nota.');
             modal?.hide();
             showMessage(data.message + ' Número Alesys: ' + data.notaId + '.', 'success');
