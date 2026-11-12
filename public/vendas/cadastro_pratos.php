@@ -51,7 +51,7 @@ try {
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
                 <div class="card produto-card h-100">
                     <div class="produto-thumb" onclick="abrirModalEditar(<?= $prato['Id'] ?>)">
-                        <img src="<?= !empty($prato['Foto']) ? htmlspecialchars($prato['Foto'], ENT_QUOTES, 'UTF-8') : '/images/no-image.png' ?>"
+                        <img src="<?= !empty($prato['Foto']) ? htmlspecialchars($prato['Foto'], ENT_QUOTES, 'UTF-8') : '/images/no-image.svg' ?>"
                             alt="<?= htmlspecialchars($prato['Nome'], ENT_QUOTES, 'UTF-8') ?>"
                             loading="lazy" decoding="async" width="240" height="160">
                     </div>
@@ -138,7 +138,7 @@ try {
                                         accept="image/jpeg,image/png,image/webp">
                                     <small class="text-muted">A imagem será redimensionada e armazenada no servidor.</small>
                                     <div class="mt-2">
-                                        <img id="fotoPreview" src="/images/no-image.png" alt="Miniatura do prato"
+                                        <img id="fotoPreview" src="/images/no-image.svg" alt="Miniatura do prato"
                                             width="120" height="120" style="object-fit:contain;border-radius:8px;">
                                     </div>
                                 </div>
