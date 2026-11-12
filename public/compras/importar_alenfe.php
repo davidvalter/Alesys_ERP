@@ -146,6 +146,16 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
         message.className = 'alert alert-' + type;
         message.textContent = text;
     };
+    const parseApiResponse = async (response) => {
+        const raw = await response.text();
+        try {
+            return JSON.parse(raw);
+        } catch {
+            const path = new URL(response.url).pathname;
+            const preview = raw.replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 180);
+            throw new Error('O endpoint ' + path + ' respondeu HTTP ' + response.status + ' com HTML ou conteúdo não JSON. Verifique se o arquivo PHP está publicado dentro de public/ e se o servidor aponta para essa pasta.' + (preview ? ' Resposta: ' + preview : ''));
+        }
+    };
     const loadList = () => location.reload();
 
     document.getElementById('btnConsultar')?.addEventListener('click', async (event) => {
@@ -156,7 +166,7 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
         message.textContent = 'Consultando o AleNFE…';
         try {
             const response = await fetch('/api/alenfe_compras_consultar.php', {method:'POST', credentials:'same-origin', headers:{'X-CSRF-Token':csrfToken}});
-            const data = await response.json();
+            const data = await parseApiResponse(response);
             if (!response.ok || !data.success) throw new Error(data.message || 'Falha ao consultar AleNFE.');
             showMessage(data.message + (data.ignoradas ? ' ' + data.ignoradas + ' registro(s) sem chave válida foram ignorados.' : ''), 'success');
             setTimeout(loadList, 800);
