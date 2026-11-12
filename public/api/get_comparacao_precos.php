@@ -83,6 +83,16 @@ try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($resultados as &$resultado) {
+        $resultado['produto_codigo'] = (int)$resultado['produto_codigo'];
+        $resultado['fornecedor_codigo'] = (int)$resultado['fornecedor_codigo'];
+        $resultado['preco_medio'] = (float)$resultado['preco_medio'];
+        $resultado['preco_minimo'] = (float)$resultado['preco_minimo'];
+        $resultado['preco_maximo'] = (float)$resultado['preco_maximo'];
+        $resultado['qtd_notas'] = (int)$resultado['qtd_notas'];
+        $resultado['quantidade_total'] = (float)$resultado['quantidade_total'];
+    }
+    unset($resultado);
 
     echo json_encode([
         'success' => true,
