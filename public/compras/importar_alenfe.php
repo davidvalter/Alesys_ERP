@@ -187,7 +187,7 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
             });
             const data = await parseApiResponse(response);
             if (!response.ok || !data.success) throw new Error(data.message || 'Falha na importação automática.');
-            const details = Array.isArray(data.detalhes) && data.detalhes.length ? '\\n' + data.detalhes.join('\\n') : '';
+            const details = Array.isArray(data.detalhes) && data.detalhes.length ? '\n' + data.detalhes.join('\n') : '';
             showMessage(data.message + details, data.falhas ? 'warning' : 'success');
             setTimeout(loadList, 1200);
         } catch (error) {
