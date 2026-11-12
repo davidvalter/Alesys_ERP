@@ -5,6 +5,20 @@ $tituloConteudo = 'Comparação de Preços';
 
 $extraCss = '
 <link rel="stylesheet" href="/styles/components_chart_card.css">
+<style>
+.multi-picker { position: relative; }
+.multi-picker-menu { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 1080; max-height: 280px; overflow-y: auto; padding: .35rem; background: #fff; border: 1px solid #ced4da; border-radius: .5rem; box-shadow: 0 .5rem 1rem rgba(0,0,0,.14); }
+.multi-picker-menu[hidden] { display: none !important; }
+.multi-picker-option { display: flex; align-items: flex-start; gap: .6rem; padding: .55rem .6rem; border-radius: .35rem; cursor: pointer; }
+.multi-picker-option:hover { background: #f1f8f4; }
+.multi-picker-option input { margin-top: .25rem; accent-color: #198754; }
+.multi-picker-empty { color: #6c757d; padding: .7rem; }
+.multi-picker-selected { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .4rem; }
+.multi-picker-chip { display: inline-flex; align-items: center; gap: .35rem; max-width: 100%; padding: .2rem .5rem; border-radius: 999px; background: #e8f3ec; color: #17643a; font-size: .8rem; }
+.multi-picker-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.multi-picker-chip button { border: 0; padding: 0; background: transparent; color: inherit; line-height: 1; }
+.multi-picker-values { display: none; }
+</style>
 ';
 
 require_once __DIR__ . '/../templates/base_protected_v2.php';
@@ -75,7 +89,8 @@ require_once __DIR__ . '/../templates/base_protected_v2.php';
     </section>
 </div>
 
-<?php require_once '../templates/footer_protected_v2.php'; ?>
-
+<!-- Os scripts da página precisam vir antes do footer, que encerra o HTML. -->
 <script src="/js/libs/chart.js"></script>
-<script src="/js/comparacao_precos.js"></script>
+<script src="/js/comparacao_precos.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/js/comparacao_precos.js') ?>"></script>
+
+<?php require_once '../templates/footer_protected_v2.php'; ?>
