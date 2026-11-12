@@ -109,7 +109,12 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
                     <div class="card mb-3">
                         <div class="card-body">
                             <label for="fornecedorAlesys" class="form-label fw-semibold">Fornecedor no Alesys</label>
-                            <select id="fornecedorAlesys" class="form-select"></select>
+                            <div class="d-flex flex-wrap gap-2">
+                                <select id="fornecedorAlesys" class="form-select flex-grow-1"></select>
+                                <button type="button" id="btnNovoFornecedor" class="btn btn-sm btn-outline-primary d-none">
+                                    <i class="fas fa-user-plus me-1"></i>Cadastrar novo fornecedor
+                                </button>
+                            </div>
                             <div id="avisoCnpj" class="form-text"></div>
                         </div>
                     </div>
@@ -130,6 +135,8 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
         </div>
     </div>
 </div>
+
+<?php require __DIR__ . '/partials/modal_mercado.php'; ?>
 
 <?php require_once __DIR__ . '/../templates/footer_protected_v2.php'; ?>
 <script>
@@ -294,3 +301,4 @@ function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES,
     });
 })();
 </script>
+<script src="/js/mercados.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/js/mercados.js') ?>"></script>
